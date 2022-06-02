@@ -17,7 +17,8 @@ const schemas = [
 
     name: { type: 'text', required: true, maxlength: 100 },
     slug: { type: 'text', required: true, maxlength: 100, regex: '^[a-z0-9-_.]+$' },
-    content: { type: 'text', editor: 'wysiwyg' }
+    image: { type: 'upload', ref: 'resources', root: '/public' },
+    content: { type: 'text', editor: 'rich', upload: { ref: 'resources', root: '/public'} }
   },
   {
     __name: 'resources',
