@@ -11,6 +11,7 @@ npm i
 npm run manage -- start
 ```
 
+
 ## Extends
 
 Generate shemas for env config.
@@ -23,6 +24,12 @@ Create a new user.
 
 ```bash
 npm run createuser
+```
+
+Run view in specific directory with watch mode.
+
+```bash
+npm run view -- start your/directory/path
 ```
 
 ## Sample Storage
