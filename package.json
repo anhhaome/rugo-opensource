@@ -51,6 +51,7 @@
     "rugo-model": "./repos/core/packages/model",
     "rugo-server": "./repos/core/packages/server",
     "rugo-static": "./repos/core/packages/static",
+    "rugo-view": "./repos/core/packages/view",
     "terminal-kit": "^2.4.0"
   }
 }
