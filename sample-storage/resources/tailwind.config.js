@@ -33,6 +33,7 @@ module.exports = {
   plugins: [
     plugin(function ({ addBase, addVariant, theme }) {
       addVariant("mactive", "&[active]");
+      addVariant("second", "&:nth-child(2)");
       addVariant("group-mactive", ":merge(.group)[active] &");
     }),
   ],

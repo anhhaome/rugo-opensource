@@ -1,0 +1,109 @@
+<%
+  const postModel = await model('posts');
+  const { data: postList } = await postModel.list({ $sort: { createdAt: -1 }});
+  const dateList = {};
+
+  for (let post of postList){
+    let date = moment(post.createdAt).format('YYYY.MM.DD');
+    dateList[date] = dateList[date] || [];
+    dateList[date].push(post);
+  }
+
+  const groups = [];
+  for (let key of Object.keys(dateList).sort().reverse()){
+    groups.push({
+      date: key,
+      posts: dateList[key]
+    });
+  }
+_%>
+<%- await include('__header__') %>
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="text-primary-500 font-bold text-sm inline-flex items-center ml-[-.5em] mb-6">
+    <ion-icon name="pricetag"></ion-icon>
+    <span class="ml-3">Pin</span>
+  </div>
+
+  <div class="border-l-2 text-justify">
+    <% for (let group of groups){ %>
+      <div class="relative">
+        <div class="absolute top-[-.5em] text-xs font-semibold pl-4
+          before:w-3 before:h-3 before:border-2 before:block before:rounded-full before:border-black before:absolute before:left-[-.55em] before:top-0.5 before:bg-white
+        "><%= group.date %></div>
+
+        <% for (let post of group.posts){ %>
+          <div class="flex px-4 py-2 ml-[-2px] border-l-2 group
+            second:pt-6 last:pb-6
+            hover:border-black
+          ">
+            <div class="flex-1">
+              <a href="/<%= post.slug %>.html" class="font-bold block uppercase mb-2"><%= post.name %></a>
+              <a href="/<%= post.slug %>.html" class="text-sm max-h-[7em] overflow-hidden inline-block">
+                <%= post.desc %>
+              </a>
+            </div>
+            <% if (post.image){ %>
+              <div class="ml-4 hidden md:block">
+                <a href="/<%= post.slug %>.html">
+                  <img src="<%= post.image %>" class="w-56 h-36 rounded-lg object-cover grayscale group-hover:grayscale-0" alt="<%= post.name %>">
+                </a>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="text-gray-500 text-sm flex items-center mb-6 mt-8 space-x-4">
+    <a href="#" class="mactive:text-primary-500 mactive:font-bold" active>Latest</a>
+    <a href="#" class="mactive:text-primary-500 mactive:font-bold">Category 1</a>
+    <a href="#" class="mactive:text-primary-500 mactive:font-bold">Category 2</a>
+  </div>
+
+  <div class="border-l-2 text-justify">
+    <% for (let group of groups){ %>
+      <div class="relative">
+        <div class="absolute top-[-.5em] text-xs font-semibold pl-4
+          before:w-3 before:h-3 before:border-2 before:block before:rounded-full before:border-black before:absolute before:left-[-.55em] before:top-0.5 before:bg-white
+        "><%= group.date %></div>
+
+        <% for (let post of group.posts){ %>
+          <div class="flex px-4 py-2 ml-[-2px] border-l-2 group
+            second:pt-6 last:pb-6
+            hover:border-black
+          ">
+            <div class="flex-1">
+              <a href="/<%= post.slug %>.html" class="font-bold block uppercase mb-2"><%= post.name %></a>
+              <a href="/<%= post.slug %>.html" class="text-sm max-h-[7em] overflow-hidden inline-block">
+                <%= post.desc %>
+              </a>
+            </div>
+            <% if (post.image){ %>
+              <div class="ml-4 hidden md:block">
+                <a href="/<%= post.slug %>.html">
+                  <img src="<%= post.image %>" class="w-56 h-36 rounded-lg object-cover grayscale group-hover:grayscale-0" alt="<%= post.name %>">
+                </a>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="flex space-x-1 items-center text-sm justify-center">
+    <button class="m-button bg-secondary-500 px-4 py-2 rounded-lg inline-flex items-center text-white px-0 py-0 w-7 h-7 text-center justify-center" disabled="">
+      <ion-icon class="text-base md hydrated" role="img" name="chevron-back"></ion-icon>
+    </button>
+    <button class="m-button bg-primary-500 px-4 py-2 rounded-lg inline-flex items-center text-white px-2 py-0 min-w-[1.75rem] h-7 text-center justify-center items-center leading-4">1</button>
+    <button class="m-button bg-secondary-500 px-4 py-2 rounded-lg inline-flex items-center text-white px-2 py-0 min-w-[1.75rem] h-7 text-center justify-center items-center leading-4">2</button>
+    <button class="m-button bg-secondary-500 px-4 py-2 rounded-lg inline-flex items-center text-white px-2 py-0 min-w-[1.75rem] h-7 text-center justify-center items-center leading-4">3</button>
+    <button class="m-button bg-secondary-500 px-4 py-2 rounded-lg inline-flex items-center text-white px-2 py-0 min-w-[1.75rem] h-7 text-center justify-center items-center leading-4">4</button>
+    <button class="m-button bg-secondary-500 px-4 py-2 rounded-lg inline-flex items-center text-white px-2 py-0 min-w-[1.75rem] h-7 text-center justify-center items-center leading-4">...</button>
+    <button class="m-button bg-secondary-500 px-4 py-2 rounded-lg inline-flex items-center text-white px-0 py-0 w-7 h-7 text-center justify-center">
+      <ion-icon class="text-base md hydrated" role="img" name="chevron-forward"></ion-icon>
+    </button>
+  </div>
+</div>
+<%- await include('__footer__') %>
