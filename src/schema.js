@@ -4,29 +4,31 @@ const schemas = [
     __type: 'mem',
     __icon: 'person',
 
-    email: { type: 'text', required: true, maxlength: 100 },
-    password: { type: 'password', maxlength: 100 },
-    apikey: { type: 'text', maxlength: 100 }
+    email: { type: 'text', required: true, maxlength: 60 },
+    password: { type: 'password', maxlength: 60 },
+    apikey: { type: 'text', maxlength: 60 }
   },
   {
     __name: 'posts',
     __type: 'mem',
     __icon: 'document-text',
 
-    name: { type: 'text', required: true, maxlength: 100 },
-    slug: { type: 'text', required: true, maxlength: 100, regex: '^[a-z0-9-_.]+$' },
+    name: { type: 'text', required: true, maxlength: 60 },
+    slug: { type: 'text', required: true, maxlength: 60, regex: '^[a-z0-9-_.]+$' },
+    desc: { type: 'text', maxlength: 160 },
     image: { type: 'upload', ref: 'resources', root: '/public' },
     category: { type: 'relation', ref: 'categories', str: 'name' },
+    content: { type: 'text', editor: 'rich', upload: { ref: 'resources', root: '/public'} },
+    status: { type: 'text', choice: ['draft', 'private', 'public'], default: 'draft' },
     pin: { type: 'boolean' },
-    content: { type: 'text', editor: 'rich', upload: { ref: 'resources', root: '/public'} }
   },
   {
     __name: 'categories',
     __type: 'mem',
     __icon: 'copy',
 
-    name: { type: 'text', required: true, maxlength: 100 },
-    slug: { type: 'text', required: true, maxlength: 100, regex: '^[a-z0-9-_.]+$' }
+    name: { type: 'text', required: true, maxlength: 60 },
+    slug: { type: 'text', required: true, maxlength: 60, regex: '^[a-z0-9-_.]+$' }
   },
   {
     __name: 'resources',
