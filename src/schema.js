@@ -20,7 +20,7 @@ const schemas = [
     category: { type: 'relation', ref: 'categories', str: 'name' },
     content: { type: 'text', editor: 'rich', upload: { ref: 'resources', root: '/public'} },
     status: { type: 'text', choice: ['draft', 'private', 'public'], default: 'draft' },
-    pin: { type: 'boolean' },
+    pin: { type: 'boolean', default: false },
   },
   {
     __name: 'categories',
