@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/anhhaome/rugo-opensource#readme",
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.2",
     "c8": "^7.11.2",
     "chai": "^4.3.6",
     "chai-http": "^4.3.0",
