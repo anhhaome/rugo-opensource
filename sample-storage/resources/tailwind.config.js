@@ -31,6 +31,7 @@ module.exports = {
   },
 
   plugins: [
+    require('@tailwindcss/typography'),
     plugin(function ({ addBase, addVariant, theme }) {
       addVariant("mactive", "&[active]");
       addVariant("second", "&:nth-child(2)");

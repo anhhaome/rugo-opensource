@@ -2,7 +2,7 @@
   const dateList = {};
 
   for (let post of posts){
-    let date = moment(new Date(post.createdAt)).format('YYYY.MM.DD');
+    let date = moment(new Date(post.createdAt)).format('YYYY/MM/DD');
     dateList[date] = dateList[date] || [];
     dateList[date].push(post);
   }

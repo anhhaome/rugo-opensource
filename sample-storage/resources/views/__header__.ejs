@@ -53,8 +53,8 @@
         <img class="h-8" src="/assets/images/logo-text.svg" alt="Rugo Logo">
       </div>
 
-      <a class="block mx-4 text-gray-700 py-2" href="/">
-        back to <b>Home</b>
+      <a class="block mx-4 text-gray-700 py-2" href="<%= typeof back !== 'undefined' ? back.href : '/' %>">
+        back to <b><%= typeof back !== 'undefined' ? back.name : 'Home' %></b>
       </a>
     </div>
   </header>
