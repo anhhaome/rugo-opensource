@@ -11,6 +11,7 @@
     "schema": "node ./src/schema.js",
     "createuser": "node ./src/createuser.js",
     "init": "./src/init.sh",
+    "start": "npm run manage -- start",
     "doc": "jsdoc2md **/*.js > docs/API.md",
     "lint:check": "eslint .",
     "lint:fix": "eslint . --fix",

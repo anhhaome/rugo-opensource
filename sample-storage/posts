@@ -1,0 +1,14 @@
+[
+  {
+    "_id": "r0l4hxvuom0uepa3",
+    "name": "Welcome to Rugo Platform (Open-source version)",
+    "slug": "welcome-to-rugo-platform-open-source-version",
+    "desc": "This a open-source version of Rugo Platform which have common tools needed for you to make a website.",
+    "content": "<p>Dear our customers,</p><p>This a open-source version of Rugo Platform which have common tools needed for you to make a website. </p><p>You can delete this page to start creating your own a new wonderful world.</p><p>Good luck,</p><p>Rugo Team.</p>",
+    "status": "public",
+    "pin": true,
+    "createdAt": "2022-06-17T04:16:53.782Z",
+    "updatedAt": "2022-06-17T04:16:53.782Z",
+    "version": 1
+  }
+]

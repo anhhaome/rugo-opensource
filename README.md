@@ -2,6 +2,19 @@
 
 An opensource version of Rugo Platform
 
+## Quick Start
+
+```bash
+npm run init
+npm run start
+```
+
+Sites:
+
+- Homepage: [http://127.0.0.1:3000/](http://127.0.0.1:3000/)
+- Blog: [http://127.0.0.1:3000/blog](http://127.0.0.1:3000/blog)
+- Admin: [http://127.0.0.1:3000/admin/](http://127.0.0.1:3000/admin/)
+
 ## Usage
 
 Copy `.env.sample` with name `.env`. And create a new directory named `storage`.
