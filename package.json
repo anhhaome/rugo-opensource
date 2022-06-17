@@ -10,6 +10,7 @@
     "view": "node repos/core/packages/view/lib/src/taile.js",
     "schema": "node ./src/schema.js",
     "createuser": "node ./src/createuser.js",
+    "init": "./src/init.sh",
     "doc": "jsdoc2md **/*.js > docs/API.md",
     "lint:check": "eslint .",
     "lint:fix": "eslint . --fix",

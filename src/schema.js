@@ -14,11 +14,11 @@ const schemas = [
     __icon: 'document-text',
 
     name: { type: 'text', required: true, maxlength: 60 },
-    slug: { type: 'text', required: true, maxlength: 60, regex: '^[a-z0-9-_.]+$' },
+    slug: { type: 'text', required: true, maxlength: 60, regex: '^[a-z0-9-_.]+$', default: '%unislug:name%', hidden: true },
     desc: { type: 'text', maxlength: 160 },
-    image: { type: 'upload', ref: 'resources', root: '/public' },
+    image: { type: 'upload', ref: 'resources', root: '/public', preview: false },
     category: { type: 'relation', ref: 'categories', str: 'name' },
-    content: { type: 'text', editor: 'rich', upload: { ref: 'resources', root: '/public'} },
+    content: { type: 'text', editor: 'rich', upload: { ref: 'resources', root: '/public'}, preview: false },
     status: { type: 'text', choice: ['draft', 'public'], default: 'draft' },
     pin: { type: 'boolean', default: false },
   },
@@ -28,7 +28,7 @@ const schemas = [
     __icon: 'copy',
 
     name: { type: 'text', required: true, maxlength: 60 },
-    slug: { type: 'text', required: true, maxlength: 60, regex: '^[a-z0-9-_.]+$' }
+    slug: { type: 'text', required: true, maxlength: 60, regex: '^[a-z0-9-_.]+$', default: '%unislug:name%', hidden: true }
   },
   {
     __name: 'resources',
