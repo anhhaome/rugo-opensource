@@ -78,7 +78,7 @@ describe('Platform test', function () {
       expect(res).to.has.property('text', fileContent('./sample-storage/resources/public/index.html'));
   
       const plugins = Object.keys(platform.context);
-      expect(plugins).to.have.all.members(['drivers', 'model', 'auth', 'schemas', 'server'])
+      expect(plugins).to.have.all.members(['onStarted', 'onClosed', 'drivers', 'model', 'auth', 'schemas', 'server'])
     });
   
     it('should create a new user', async () => {
