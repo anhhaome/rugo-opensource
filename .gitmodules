@@ -1,0 +1,15 @@
+[submodule "packages/api"]
+	path = packages/api
+	url = git@github.com:rugo-vn/api.git
+[submodule "packages/driver"]
+	path = packages/driver
+	url = git@github.com:rugo-vn/driver.git
+[submodule "packages/model"]
+	path = packages/model
+	url = git@github.com:rugo-vn/model.git
+[submodule "packages/server"]
+	path = packages/server
+	url = git@github.com:rugo-vn/server.git
+[submodule "packages/auth"]
+	path = packages/auth
+	url = git@github.com:rugo-vn/auth.git
