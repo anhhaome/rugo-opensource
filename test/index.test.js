@@ -8,7 +8,10 @@ import rimraf from 'rimraf';
 import dotenv from 'dotenv';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
+import bcrypt from 'bcryptjs';
 import { createRunner } from '@rugo-vn/service';
+
+chai.use(chaiHttp);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -19,12 +22,14 @@ const DEMO_POST = {
   pin: true,
   status: 'public'
 };
+const ADMIN_PHONE = '11111111';
+const ADMIN_PASSWORD = '00000000';
 
-chai.use(chaiHttp);
+describe('Opensource platform test', function(){
+  this.timeout(10000);
 
-describe('Opensource platform test', () => {
   const root = join(__dirname, '.cache');
-  let runner;
+  let runner, adminToken;
 
   dotenv.config();
   process.env.RUGO_STORAGE = root;
@@ -41,6 +46,29 @@ describe('Opensource platform test', () => {
 
     await runner.load();
     await runner.start();
+
+    // create admin user
+    const res = await chai.request(address)
+      .post('/api/register')
+      .send();
+
+    await runner.call('model.create', 
+      { doc: {
+        phone: ADMIN_PHONE,
+        password: bcrypt.hashSync(ADMIN_PASSWORD, 10),
+        perms: [{ model: '*', action: '*', id: '*' }]
+      }},
+      { meta: { schema: JSON.parse(process.env.RUGO_AUTH_SCHEMA)} }
+    );
+
+    const res3 = await chai.request(address)
+      .post('/api/login')
+      .send({
+        identity: ADMIN_PHONE,
+        password: ADMIN_PASSWORD
+      });
+
+    adminToken = res3.body.data;
   });
 
   after(async () => {
@@ -62,6 +90,7 @@ describe('Opensource platform test', () => {
     it('should be create a post', async () => {
       const res = await await chai.request(address)
         .post('/api/posts')
+        .set({ 'authorization': `Bearer ${adminToken}`})
         .send(DEMO_POST);
 
       expect(res).to.has.property('status', 200);
@@ -74,6 +103,7 @@ describe('Opensource platform test', () => {
     it('should be not create a post', async () => {
       const res = await chai.request(address)
         .post('/api/posts')
+        .set({ 'authorization': `Bearer ${adminToken}`})
         .send({
           ...DEMO_POST,
           slug: 'Not SLug'

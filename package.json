@@ -4,18 +4,22 @@
   "main": "./node_modules/@rugo-vn/service/src/start.js",
   "type": "module",
   "scripts": {
-    "start": "node ./node_modules/@rugo-vn/service/src/start.js",
-    "schema": "node ./src/schema.js",
+    "start": "node ./packages/service/src/start.js",
+    "dev": "nodemon ./packages/service/src/start.js",
+    "env": "node src/env.js > .env.sample",
+    "update-packages": "git submodule foreach git pull origin master",
     "test": "mocha",
     "coverage": "c8 npm run test"
   },
   "dependencies": {
     "@rugo-vn/api": "./packages/api",
-    "@rugo-vn/auth": "^2.0.0-beta.0",
+    "@rugo-vn/auth": "./packages/auth",
     "@rugo-vn/driver": "./packages/driver",
     "@rugo-vn/model": "./packages/model",
     "@rugo-vn/server": "./packages/server",
-    "@rugo-vn/service": "^2.0.0-beta.2"
+    "@rugo-vn/service": "./packages/service",
+    "bcryptjs": "^2.4.3",
+    "snake-case": "^3.0.4"
   },
   "devDependencies": {
     "c8": "^7.12.0",
@@ -23,6 +27,7 @@
     "chai-http": "^4.3.0",
     "dotenv": "^16.0.1",
     "mocha": "^10.0.0",
+    "nodemon": "^2.0.19",
     "rimraf": "^3.0.2"
   }
 }

@@ -13,3 +13,6 @@
 [submodule "packages/auth"]
 	path = packages/auth
 	url = git@github.com:rugo-vn/auth.git
+[submodule "packages/service"]
+	path = packages/service
+	url = git@github.com:rugo-vn/service.git
