@@ -7,7 +7,7 @@
     "start": "node ./packages/service/src/start.js",
     "dev": "nodemon ./packages/service/src/start.js",
     "env": "node src/env.js > .env.sample",
-    "update-packages": "git submodule foreach git pull origin master",
+    "module:update": "git submodule foreach git pull origin master",
     "test": "mocha",
     "coverage": "c8 npm run test"
   },
