@@ -1,5 +1,5 @@
 {
-  "name": "@rugo-vn/opensource",
+  "name": "@rugo-vn/open",
   "version": "2.0.0-beta.0",
   "main": "./node_modules/@rugo-vn/service/src/start.js",
   "type": "module",
@@ -19,8 +19,9 @@
     "@rugo-vn/model": "./packages/model",
     "@rugo-vn/server": "./packages/server",
     "@rugo-vn/service": "./packages/service",
-    "bcryptjs": "^2.4.3",
-    "snake-case": "^3.0.4"
+    "@rugo-vn/fx": "./packages/fx",
+    "@rugo-vn/view": "./packages/view",
+    "ramda": "^0.28.0"
   },
   "devDependencies": {
     "c8": "^7.12.0",

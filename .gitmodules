@@ -16,3 +16,6 @@
 [submodule "packages/service"]
 	path = packages/service
 	url = git@github.com:rugo-vn/service.git
+[submodule "packages/fx"]
+	path = packages/fx
+	url = git@github.com:rugo-vn/fx.git
