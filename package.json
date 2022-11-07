@@ -4,32 +4,49 @@
   "main": "./node_modules/@rugo-vn/service/src/start.js",
   "type": "module",
   "scripts": {
-    "start": "node ./packages/service/src/start.js",
-    "dev": "nodemon ./packages/service/src/start.js",
-    "env": "node src/env.js > .env.sample",
+    "start": "./scripts/start.sh",
+    "css": "npx tailwindcss -i ./src/input.css -o ./sample-storage/public/assets/css/output.css --watch",
+    "dev": "npm run admin:start & npm run css & NODE_ENV=development nodemon ./packages/service/src/start.js",
+    "test": "mocha",
+    "coverage": "c8 npm run test",
     "module:update": "git submodule foreach git pull origin master",
     "module:master": "git submodule foreach git checkout master",
-    "test": "mocha",
-    "coverage": "c8 npm run test"
+    "admin:start": "cd packages/admin && npm i && npm run dev",
+    "admin:build": "cd packages/admin && npm i && npm run build",
+    "create-super-user": "node ./scripts/create-super-user.js"
   },
   "dependencies": {
+    "@rugo-vn/admin": "./packages/admin",
     "@rugo-vn/api": "./packages/api",
     "@rugo-vn/auth": "./packages/auth",
     "@rugo-vn/driver": "./packages/driver",
+    "@rugo-vn/fx": "./packages/fx",
     "@rugo-vn/model": "./packages/model",
     "@rugo-vn/server": "./packages/server",
     "@rugo-vn/service": "./packages/service",
-    "@rugo-vn/fx": "./packages/fx",
     "@rugo-vn/view": "./packages/view",
-    "ramda": "^0.28.0"
+    "ramda": "^0.28.0",
+    "terminal-kit": "^3.0.0"
   },
   "devDependencies": {
+    "animate.css": "^4.1.1",
+    "autoprefixer": "^10.4.13",
     "c8": "^7.12.0",
     "chai": "^4.3.6",
     "chai-http": "^4.3.0",
+    "chokidar": "^3.5.3",
     "dotenv": "^16.0.1",
     "mocha": "^10.0.0",
     "nodemon": "^2.0.19",
-    "rimraf": "^3.0.2"
+    "postcss": "^8.4.18",
+    "rimraf": "^3.0.2",
+    "tailwindcss": "^3.2.2",
+    "ws": "^8.11.0"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "/sample-storage/**",
+      "/storage/**"
+    ]
   }
 }

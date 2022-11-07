@@ -19,3 +19,6 @@
 [submodule "packages/fx"]
 	path = packages/fx
 	url = git@github.com:rugo-vn/fx.git
+[submodule "packages/admin"]
+	path = packages/admin
+	url = git@github.com:rugo-vn/admin.git

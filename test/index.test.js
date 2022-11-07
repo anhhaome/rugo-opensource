@@ -8,6 +8,7 @@ import { createBroker, exec } from '@rugo-vn/service';
 import rimraf from 'rimraf';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
+import colors from 'colors';
 
 chai.use(chaiHttp);
 
@@ -16,19 +17,34 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = 8080;
 const ADMIN_USER = { email: 'admin@rugo.vn', password: '123456' };
 const NORMAL_USER = { email: 'normal@rugo.vn', password: '54321' };
-const DEMO_POST = { name: 'Sample', slug: 'sample', content: 'Hello World' };
+const DEMO_POST = {
+  name: 'Sample',
+  slug: 'sample',
+  image: '/uploads/sample.png',
+  content: 'Hello World'
+};
+const DEMO_CATEGORY = { name: 'Greeting', slug: 'hi', };
 
-describe('Pro test', function () {
+const showPerf = () => {
+  console.log(colors.green('Memory Usage: ') + Math.floor(process.memoryUsage().heapUsed / 1024 / 1024 * 10) / 10 + 'MB');
+}
+
+describe('Platform test', function () {
   const root = join(__dirname, '.cache');
   let broker, settings;
 
   const createRequest = () => chai.request(`http://localhost:${PORT}`);
 
   before(async () => {
+    showPerf();
+
     if (fs.existsSync(root))
       rimraf.sync(root);
 
-    await exec(`cp -rL "${join(__dirname, '../sample-storage')}" "${root}"`);
+    fs.mkdirSync(root);
+    
+    await exec(`cp -rL "${join(__dirname, '../sample-storage/public')}" "${root}/public"`);
+    await exec(`cp -rL "${join(__dirname, '../sample-storage/views')}" "${root}/views"`);
 
     process.env.STORAGE = root;
     process.env.PORT = PORT;
@@ -46,6 +62,8 @@ describe('Pro test', function () {
   });
 
   after(async () => {
+    showPerf();
+
     await broker.close();
 
     if (fs.existsSync(root))
@@ -95,7 +113,8 @@ describe('Pro test', function () {
         perms: [
           { model: '*', action: '*', id: '*' }
         ]
-      }, schema: settings.server.args.authSchema
+      },
+      name: settings.server.args.authModel,
     });
     expect(res3.data).to.has.property('_id', adminUser._id);
     expect(res3.data.perms).to.has.property('length', 1);
@@ -118,21 +137,57 @@ describe('Pro test', function () {
     expect(res.body.errors[0]).to.has.property('title', 'ForbiddenError');
   });
 
-  let demoPost;
-  it('should create a post', async () => {
+  let demoPost, demoCate;
+
+  it('should upload a file', async () => {
     const res = await createRequest()
-      .post('/api/posts')
-      .send(DEMO_POST)
+    .post('/api/uploads')
+    .field('name', 'sample.png')
+    .attach('data', './package.json')
+    .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.body.data).to.has.property('name', 'sample.png');
+  });
+
+  it('should create a category', async () => {
+    const res = await createRequest()
+      .post('/api/categories')
+      .send(DEMO_CATEGORY)
       .set('Authorization', `Bearer ${adminToken}`);
 
     expect(res).to.has.property('status', 200);
     expect(res.body.data).to.has.property('_id');
     
+    demoCate = res.body.data;
+  });
+
+  it('should create a post', async () => {
+    const res = await createRequest()
+      .post('/api/posts')
+      .send({
+        ...DEMO_POST,
+        category: demoCate._id,
+      })
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res).to.has.property('status', 200);
+    expect(res.body.data).to.has.property('_id');
+    expect(res.body.data).to.has.property('category', demoCate._id);
+    
     demoPost = res.body.data;
   });
 
-  // it('should view test', async () => {
-  //   const res = await createRequest().get('/view');
-  //   expect(res).to.has.property('status', 200);
-  // });
+  it('should search post', async () => {
+    const res = await createRequest()
+      .get(`/api/posts?search=${DEMO_POST.name}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res).to.has.property('status', 200);
+      expect(res.body.data).to.has.property('length', 1);
+  });
+
+  it('should view test', async () => {
+    const res = await createRequest().get('/blog');
+    expect(res).to.has.property('status', 200);
+  });
 });

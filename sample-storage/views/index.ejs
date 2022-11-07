@@ -1,1 +1,11 @@
-Hello World
+<%
+const { data: posts } = await model('posts').find({});
+_%>
+<%- await include('_head.ejs') %>
+<h1>Home</h1>
+<ul>
+  <% for (let post of posts) { %>
+    <li><a href="/blog/<%= post.slug %>.html"><%= post.name %></a></li>
+  <% } %>
+</ul>
+<%- await include('_foot.ejs') %>

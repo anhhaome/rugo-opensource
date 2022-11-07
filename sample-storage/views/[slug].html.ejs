@@ -1,0 +1,9 @@
+<%
+const { data: { 0: post } } = await model('posts').find({ slug: params.slug });
+_%>
+<%- await include('_head.ejs') %>
+<h1><%= post.name %></h1>
+<div>
+  <%- post.content %>
+</div>
+<%- await include('_foot.ejs') %>
