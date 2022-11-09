@@ -4,7 +4,7 @@ import fs from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
-import { createBroker, exec } from '@rugo-vn/service';
+import { createBroker } from '@rugo-vn/service';
 import rimraf from 'rimraf';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
@@ -42,9 +42,6 @@ describe('Platform test', function () {
       rimraf.sync(root);
 
     fs.mkdirSync(root);
-    
-    await exec(`cp -rL "${join(__dirname, '../sample-storage/public')}" "${root}/public"`);
-    await exec(`cp -rL "${join(__dirname, '../sample-storage/views')}" "${root}/views"`);
 
     process.env.STORAGE = root;
     process.env.PORT = PORT;

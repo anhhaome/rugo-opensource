@@ -49,7 +49,7 @@ export const actions = {
 
 export const started = async function(){
   if (process.env.NODE_ENV === 'development') {
-    const watcher = chokidar.watch('sample-storage');
+    const watcher = chokidar.watch(process.env.STORAGE || './storage');
 
     const wss = new WebSocketServer({ port: 8081 });
 

@@ -1,64 +1,87 @@
 import { join, resolve } from 'path';
-import { authSchema } from '@rugo-vn/auth/src/utils.js';
-import { indexBy, mergeDeepLeft} from 'ramda';
+import { indexBy} from 'ramda';
+import process from 'process';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { exec } from '@rugo-vn/service';
 
-const USER_SCHEMA = mergeDeepLeft({
-  _name: 'users',
-  _driver: 'mem',
-  _uniques: ['email'],
-  _acl: ['create'],
-  _icon: 'people',
-  type: 'object',
-  properties: {
-    email: { type: 'string' },
-  },
-  required: ['email'],
-}, authSchema);
+const isDev = process.env.NODE_ENV ===  'development';
+const port = process.env.PORT || 3000;
+const storage = process.env.STORAGE || './storage';
+const secret = process.env.SECRET || 'secretstring';
+const bundle = process.env.BUNDLE || 'default';
 
-const VIEW_SCHEMA = {
-  _name: 'views',
-  _driver: 'fs',
-  _icon: 'folder-open'
-};
+const app = JSON.parse(readFileSync(join('bundles', bundle, 'app.json')));
 
-const UPLOAD_FIELD_SCHEMA = { type: 'file', ref: 'uploads', prefix: '/uploads/', mimes: [ 'image/jpeg', 'image/png' ] };
+// admin
+const statics = [];
+const redirects = [];
+const adminRoot = join('packages', 'admin', 'dist');
+if (existsSync(adminRoot)) {
+  redirects.push({ path: '/admin', to: '/admin/' });
+  statics.push({ use: '/admin/', root: adminRoot });
+}
 
-const SCHEMAS = [
-  {
-    _name: 'posts',
-    _driver: 'mem',
-    _uniques: ['name', 'slug'],
-    _icon: 'document-text',
-    type: 'object',
-    properties: {
-      name: { type: 'string', maxLength: 60 },
-      slug: { type: 'string', maxLength: 60 },
-      desc: { type: 'text' },
-      category: { type: 'relation', ref: 'categories' },
-      image: UPLOAD_FIELD_SCHEMA,
-      content: { type: 'rich', image: UPLOAD_FIELD_SCHEMA },
-    },
-    required: ['name', 'slug'],
-  },
-  {
-    _name: 'categories',
-    _driver: 'mem',
-    _uniques: ['name', 'slug'],
-    _icon: 'file-tray',
-    type: 'object',
-    properties: {
-      name: { type: 'string', maxLength: 60 },
-      slug: { type: 'string', maxLength: 60 },
+// schema preparation
+const refs = {};
+const views = [];
+
+let schemas = []
+
+for (let schema of app.schemas) {
+  if (schema.$id){ 
+    refs[schema.$id] = schema;
+    delete refs[schema.$id].$id;
+    continue;
+  }
+
+  schemas.push(schema);
+
+  if (schema._static) {
+    statics.push({ use: schema._static, root: join(storage, schema._name) });
+  }
+
+  if (schema._view)  {
+    views.push({ use: schema._view, model: schema._name });
+  }
+}
+
+const replaceRef = o => {
+  if (Array.isArray(o))
+    return o.map(i => replaceRef(i));
+
+  if (!o)
+    return o;
+
+  if (typeof o === 'object') {
+    if (o.$ref)
+      return refs[o.$ref];
+    
+    const nextO = {};
+    for (let key in o) {
+      nextO[key] = replaceRef(o[key]);
     }
-  },
-  {
-    _name: 'uploads',
-    _driver: 'fs',
-    _icon: 'images',
-  },
-  USER_SCHEMA,
-  VIEW_SCHEMA,
-];
+    return nextO;
+  }
+
+  return o;
+}
+
+schemas = schemas.map(replaceRef);
+
+// storage
+if (!existsSync(storage))
+  mkdirSync(storage);
+
+for (let schema of schemas){
+  if (schema._driver === 'mem' || schema._driver === 'fs') {
+    let modelPath = join(storage, schema._name);
+    let originPath = join('bundles', bundle, 'models', schema._name);
+    if (!existsSync(modelPath) && existsSync(originPath)) {
+      await exec(`cp -rL "${originPath}" "${modelPath}"`);
+    }
+    continue;
+  }
+}
 
 export default {
   _services: [
@@ -73,17 +96,17 @@ export default {
     'src/index.js',
   ],
   _globals: {
-    ...indexBy(i => `schema.${i._name}`)(SCHEMAS),
+    ...indexBy(i => `schema.${i._name}`)(schemas),
   },
-  schemas: SCHEMAS,
+  schemas,
   driver: {
-    mem: resolve(process.env.STORAGE),
-    fs: resolve(process.env.STORAGE),
+    mem: resolve(storage),
+    fs: resolve(storage),
   },
   server: {
-    port: process.env.PORT,
+    port,
     routes: [
-      ...(process.env.NODE_ENV === 'development' ? [
+      ...(isDev ? [
         { method: 'get', path: '/live.js', action: 'open.live' },
       ] : []),
 
@@ -98,17 +121,17 @@ export default {
       { method: 'patch', path: '/api/:model/:id', action: 'api.update' },
       { method: 'delete', path: '/api/:model/:id', action: 'api.remove' },
       
-      { method: 'use', path: '/blog', action: 'view.render' },
+      { method: 'use', path: '/', action: 'view.render' },
     ],
     args: {
-      authModel: USER_SCHEMA._name,
-      viewModel: VIEW_SCHEMA._name,
+      views,
+      authModel: app.authModel,
       auth: {},
-      // routes: ROUTES,
     },
-    static: join(process.env.STORAGE, 'public'),
+    statics,
+    redirects,
   },
   auth: {
-    secret: process.env.SECRET,
+    secret: secret,
   }
 }

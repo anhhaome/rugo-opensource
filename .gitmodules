@@ -22,3 +22,6 @@
 [submodule "packages/admin"]
 	path = packages/admin
 	url = git@github.com:rugo-vn/admin.git
+[submodule "packages/view"]
+	path = packages/view
+	url = git@github.com:rugo-vn/view.git

@@ -1,10 +1,9 @@
 node_modules
+coverage
 package-lock.json
 .env
 .cache
 storage
-sample-storage/*
-!sample-storage/views
-!sample-storage/public
-sample-storage/public/admin
-sample-storage/public/uploads
+bundles/*
+!bundles/.gitkeep
+!bundles/default
