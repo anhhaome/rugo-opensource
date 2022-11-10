@@ -83,6 +83,18 @@ for (let schema of schemas){
   }
 }
 
+// css
+if (app.css) {
+  for (let c of app.css) {
+    c.input = join('bundles', bundle, c.input);
+    c.output = join(storage, c.output.replace(/^models/, ''));
+
+    for (let i = 0; i < c.content.length; i++){
+      c.content[i] = join(storage, c.content[i].replace(/^models/, ''));
+    }
+  }
+}
+
 export default {
   _services: [
     'node_modules/@rugo-vn/driver/src/mem/index.js',
@@ -133,5 +145,8 @@ export default {
   },
   auth: {
     secret: secret,
+  },
+  open: {
+    css: app.css,
   }
 }

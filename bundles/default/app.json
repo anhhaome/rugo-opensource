@@ -66,5 +66,17 @@
       "_view": "/blog"
     }
   ],
-  "authModel": "users"
+  "authModel": "users",
+  "css": [
+    {
+      "content": ["models/statics/**/*.{html,js,ejs}"],
+      "theme": {
+        "fontFamily": {
+          "sans": ["Quicksand"]
+        }
+      },
+      "input": "css/input.css",
+      "output": "models/statics/assets/css/output.min.css"
+    }
+  ]
 }
