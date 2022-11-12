@@ -4,7 +4,6 @@
   "main": "./node_modules/@rugo-vn/service/src/start.js",
   "type": "module",
   "scripts": {
-    "start": "./scripts/start.sh",
     "css": "npx tailwindcss -i ./src/input.css -o ./sample-storage/public/assets/css/output.css --watch",
     "dev": "npm run admin:start & npm run css & NODE_ENV=development nodemon ./packages/service/src/start.js",
     "test": "mocha",
