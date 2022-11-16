@@ -15,7 +15,7 @@ const app = JSON.parse(readFileSync(join('bundles', bundle, 'app.json')));
 // admin
 const statics = [];
 const redirects = [];
-const adminRoot = join('packages', 'admin', 'dist');
+const adminRoot = join('packages', 'admin', 'dist', 'admin');
 if (existsSync(adminRoot)) {
   redirects.push({ path: '/admin', to: '/admin/' });
   statics.push({ use: '/admin/', root: adminRoot });
@@ -132,6 +132,9 @@ export default {
       { method: 'get', path: '/api/:model/:id', action: 'api.get' },
       { method: 'patch', path: '/api/:model/:id', action: 'api.update' },
       { method: 'delete', path: '/api/:model/:id', action: 'api.remove' },
+
+      { method: 'all', path: '/apix/:action/:model', action: 'api.x' },
+      { method: 'all', path: '/apix/:action/:model/:id', action: 'api.x' },
       
       { method: 'use', path: '/', action: 'view.render' },
     ],

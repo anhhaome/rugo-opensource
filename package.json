@@ -5,13 +5,16 @@
   "type": "module",
   "scripts": {
     "css": "npx tailwindcss -i ./src/input.css -o ./sample-storage/public/assets/css/output.css --watch",
-    "dev": "npm run admin:start & npm run css & NODE_ENV=development nodemon ./packages/service/src/start.js",
+    "dev": "npm run admin:start & npm run css & npm run server:dev",
+    "start": "npm run admin:build && npm run server:start",
     "test": "mocha",
     "coverage": "c8 npm run test",
     "module:update": "git submodule foreach git pull origin master",
     "module:master": "git submodule foreach git checkout master",
     "admin:start": "cd packages/admin && npm i && npm run dev",
     "admin:build": "cd packages/admin && npm i && npm run build",
+    "server:dev": "NODE_ENV=development nodemon ./packages/service/src/start.js",
+    "server:start": "NODE_ENV=production node ./packages/service/src/start.js",
     "create-super-user": "node ./scripts/create-super-user.js"
   },
   "dependencies": {
