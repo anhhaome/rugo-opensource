@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  database:
+    image: 'mongo'
+    container_name: rugo-db
+    environment:
+      - MONGO_INITDB_DATABASE=demo # database name you want to make
+      - MONGO_INITDB_ROOT_USERNAME=root # set your container root username
+      - MONGO_INITDB_ROOT_PASSWORD=secret # set your contatner root password
+    volumes:
+      - ./mongo-entrypoint:/docker-entrypoint-initdb.d
+      - mongodb:/data/db
+      - mongoconfig:/data/configdb
+    ports:
+      - '27017-27019:27017-27019'
+    networks:
+      - rugo-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+volumes:
+  mongodb:
+  mongoconfig:
+
+networks:
+  rugo-network:
+    driver: bridge

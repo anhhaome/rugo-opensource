@@ -3,6 +3,7 @@ coverage
 package-lock.json
 .env
 .cache
+.tmp
 storage
 bundles/*
 !bundles/.gitkeep

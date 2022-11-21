@@ -3,10 +3,14 @@ import { indexBy} from 'ramda';
 import process from 'process';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { exec } from '@rugo-vn/service';
+import rimraf from 'rimraf';
+import { restore } from '@rugo-vn/driver/src/mongo/actions.js';
 
+const isInit = !!process.env.INIT;
 const isDev = process.env.NODE_ENV ===  'development';
 const port = process.env.PORT || 3000;
 const storage = process.env.STORAGE || './storage';
+const mongo = process.env.MONGO || null;
 const secret = process.env.SECRET || 'secretstring';
 const bundle = process.env.BUNDLE || 'default';
 
@@ -69,18 +73,52 @@ const replaceRef = o => {
 schemas = schemas.map(replaceRef);
 
 // storage
-if (!existsSync(storage))
+if (isInit) {
+  rimraf.sync(storage);
   mkdirSync(storage);
+  mkdirSync('.tmp', { recursive: true });
 
-for (let schema of schemas){
-  if (schema._driver === 'mem' || schema._driver === 'fs') {
-    let modelPath = join(storage, schema._name);
-    let originPath = join('bundles', bundle, 'models', schema._name);
-    if (!existsSync(modelPath) && existsSync(originPath)) {
-      await exec(`cp -rL "${originPath}" "${modelPath}"`);
+  for (let schema of schemas){
+    if (schema._driver === 'mem' || schema._driver === 'fs') {
+      let modelPath = join(storage, schema._name);
+      let originPath = join('bundles', bundle, schema._name);
+
+      if (!existsSync(modelPath) && existsSync(originPath)) {
+        await exec(`cp -rL "${originPath}" "${modelPath}"`);
+      }
+      continue;
     }
-    continue;
+
+    if (schema._driver === 'mongo') {
+      let originPath = join('bundles', bundle, schema._name);
+      await restore.bind({
+        mongoUri: mongo,
+      })({ register: { name: schema._name }, file: originPath})
+    }
   }
+
+  rimraf.sync('.tmp');
+}
+
+if (schemas.filter(schema => schema._name === app.authModel || schema._name === 'users').length === 0) {
+  schemas.push({
+    "_name": "users",
+    "_driver": "mem",
+    "_uniques": [ "email" ],
+    "_acl": [ "create" ],
+    "_icon": "people",
+    "type": "object",
+    "properties": {
+      "email": { "type": "string" },
+      "password": { "type": "string" },
+      "apikey": { "type": "string" },
+      "perms": {
+        "type": "array",
+        "items": { "type": "object" }
+      }
+    },
+    "required": [ "email" ]
+  });
 }
 
 // css
@@ -97,23 +135,29 @@ if (app.css) {
 
 export default {
   _services: [
-    'node_modules/@rugo-vn/driver/src/mem/index.js',
-    'node_modules/@rugo-vn/driver/src/fs/index.js',
+    'src/index.js',
+    ...(storage ? [
+      'node_modules/@rugo-vn/driver/src/mem/index.js',
+      'node_modules/@rugo-vn/driver/src/fs/index.js',
+    ]: []),
+    ...(mongo ? ['node_modules/@rugo-vn/driver/src/mongo/index.js'] : []),
     'node_modules/@rugo-vn/model/src/index.js',
     'node_modules/@rugo-vn/auth/src/index.js',
     'node_modules/@rugo-vn/api/src/index.js',
     'node_modules/@rugo-vn/fx/src/index.js',
     'node_modules/@rugo-vn/view/src/index.js',
     'node_modules/@rugo-vn/server/src/index.js',
-    'src/index.js',
   ],
   _globals: {
     ...indexBy(i => `schema.${i._name}`)(schemas),
   },
   schemas,
   driver: {
-    mem: resolve(storage),
-    fs: resolve(storage),
+    ...(storage ? {
+      mem: resolve(storage),
+      fs: resolve(storage),
+    } : {}),
+    ...(mongo ? { mongo } : {}),
   },
   server: {
     port,
@@ -140,7 +184,7 @@ export default {
     ],
     args: {
       views,
-      authModel: app.authModel,
+      authModel: app.authModel || 'users',
       auth: {},
     },
     statics,
