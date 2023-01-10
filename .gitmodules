@@ -1,27 +1,3 @@
-[submodule "packages/api"]
-	path = packages/api
-	url = git@github.com:rugo-vn/api.git
-[submodule "packages/driver"]
-	path = packages/driver
-	url = git@github.com:rugo-vn/driver.git
-[submodule "packages/model"]
-	path = packages/model
-	url = git@github.com:rugo-vn/model.git
-[submodule "packages/server"]
-	path = packages/server
-	url = git@github.com:rugo-vn/server.git
-[submodule "packages/auth"]
-	path = packages/auth
-	url = git@github.com:rugo-vn/auth.git
-[submodule "packages/service"]
-	path = packages/service
-	url = git@github.com:rugo-vn/service.git
-[submodule "packages/fx"]
-	path = packages/fx
-	url = git@github.com:rugo-vn/fx.git
 [submodule "packages/admin"]
 	path = packages/admin
 	url = git@github.com:rugo-vn/admin.git
-[submodule "packages/view"]
-	path = packages/view
-	url = git@github.com:rugo-vn/view.git

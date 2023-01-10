@@ -2,32 +2,49 @@
 
 An opensource version of Rugo Platform.
 
-## Overview
+## Environment Variables
 
-When start application with `npm run start` or `npm run dev`, it will load `rugo.config.js` and read some variables from environment.
+- `PORT`
+- `MONGO`
+- `SECRET`
+- `STORAGE`
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
 
-If some model from `bundle` are missing, it will load a original one from bundle.
+## Usage
 
-## Enviroments
+Install packages:
 
-Basic env:
+```bash
+npm i
+npm run rugo:test
+npm run rugo:coverage
+```
 
-- `PORT` port to mount server. Default: `3000`.
-- `STORAGE` directory to store data. Default: `storage`.
-- `SECRET` secret string to encrypt. Default: `secretstring`.
-- `BUNDLE` selected bundle to run application. Default: `default`.
+Mount space:
 
-## Development
+```bash
+npm run rugo:mount <your_space_bundle_path>
+```
 
-**ports**
+Run platform:
 
-- `3000` backend when dev
-- `8080` admin front end when dev
-- `8081` socket backend when dev
+```bash
+npm run rugo:dev
+npm run rugo:start
+```
 
-## Scripts
+Test URI
 
-- `npm run create-super-user`
+```bash
+curl -X POST http://localhost:3000/api/login -H "Content-Type: application/json" -d '{"email":"admin@rugo.vn","password":"password"}'
+```
+
+Generate TailwindCSS
+
+```bash
+npm run css <watch_dir> <css_output_path>
+```
 
 ## License
 

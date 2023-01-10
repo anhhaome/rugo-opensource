@@ -1,199 +1,188 @@
-import { join, resolve } from 'path';
-import { indexBy} from 'ramda';
-import process from 'process';
-import { existsSync, mkdirSync, readFileSync } from 'fs';
-import { exec } from '@rugo-vn/service';
-import rimraf from 'rimraf';
-import { restore } from '@rugo-vn/driver/src/mongo/actions.js';
+import { resolve } from 'path';
+import { SPACE_ID } from './src/constants.js';
 
-const isInit = !!process.env.INIT;
-const isDev = process.env.NODE_ENV ===  'development';
 const port = process.env.PORT || 3000;
-const storage = process.env.STORAGE || './storage';
-const mongo = process.env.MONGO || null;
+const mongo = process.env.MONGO || 'mongodb://root:secret@localhost:27017/demo';
+const storage = resolve(process.env.STORAGE || '.storage');
 const secret = process.env.SECRET || 'secretstring';
-const bundle = process.env.BUNDLE || 'default';
+const admin = process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD ? 
+  { email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD } : null;
 
-const app = JSON.parse(readFileSync(join('bundles', bundle, 'app.json')));
-
-// admin
-const statics = [];
-const redirects = [];
-const adminRoot = join('packages', 'admin', 'dist', 'admin');
-if (existsSync(adminRoot)) {
-  redirects.push({ path: '/admin', to: '/admin/' });
-  statics.push({ use: '/admin/', root: adminRoot });
-}
-
-// schema preparation
-const refs = {};
-const views = [];
-
-let schemas = []
-
-for (let schema of app.schemas) {
-  if (schema.$id){ 
-    refs[schema.$id] = schema;
-    delete refs[schema.$id].$id;
-    continue;
-  }
-
-  schemas.push(schema);
-
-  if (schema._static) {
-    statics.push({ use: schema._static, root: join(storage, schema._name) });
-  }
-
-  if (schema._view)  {
-    views.push({ use: schema._view, model: schema._name });
-  }
-}
-
-const replaceRef = o => {
-  if (Array.isArray(o))
-    return o.map(i => replaceRef(i));
-
-  if (!o)
-    return o;
-
-  if (typeof o === 'object') {
-    if (o.$ref)
-      return refs[o.$ref];
-    
-    const nextO = {};
-    for (let key in o) {
-      nextO[key] = replaceRef(o[key]);
-    }
-    return nextO;
-  }
-
-  return o;
-}
-
-schemas = schemas.map(replaceRef);
-
-// storage
-if (isInit) {
-  rimraf.sync(storage);
-  mkdirSync(storage);
-  mkdirSync('.tmp', { recursive: true });
-
-  for (let schema of schemas){
-    if (schema._driver === 'mem' || schema._driver === 'fs') {
-      let modelPath = join(storage, schema._name);
-      let originPath = join('bundles', bundle, schema._name);
-
-      if (!existsSync(modelPath) && existsSync(originPath)) {
-        await exec(`cp -rL "${originPath}" "${modelPath}"`);
-      }
-      continue;
-    }
-
-    if (schema._driver === 'mongo') {
-      let originPath = join('bundles', bundle, schema._name);
-      await restore.bind({
-        mongoUri: mongo,
-      })({ register: { name: schema._name }, file: originPath})
-    }
-  }
-
-  rimraf.sync('.tmp');
-}
-
-if (schemas.filter(schema => schema._name === app.authModel || schema._name === 'users').length === 0) {
-  schemas.push({
-    "_name": "users",
-    "_driver": "mem",
-    "_uniques": [ "email" ],
-    "_acl": [ "create" ],
-    "_icon": "people",
-    "type": "object",
-    "properties": {
-      "email": { "type": "string" },
-      "password": { "type": "string" },
-      "apikey": { "type": "string" },
-      "perms": {
-        "type": "array",
-        "items": { "type": "object" }
-      }
+const createGateHandler = action => {
+  return {
+    name: 'auth.gate',
+    input: {
+      token: '_.headers.authorization',
+      perms: '_.space.perms',
+      ...(action ? {
+        'auth.tableName': '_.params.tableName',
+        'auth.driveName': '_.params.driveName',
+        'auth.action': action,
+        'auth.id': '_.params.id'
+      } : {}),
     },
-    "required": [ "email" ]
-  });
-}
-
-// css
-if (app.css) {
-  for (let c of app.css) {
-    c.input = join('bundles', bundle, c.input);
-    c.output = join(storage, c.output.replace(/^models/, ''));
-
-    for (let i = 0; i < c.content.length; i++){
-      c.content[i] = join(storage, c.content[i].replace(/^models/, ''));
-    }
+    output: { user: '_' }
   }
 }
 
 export default {
   _services: [
-    'src/index.js',
-    ...(storage ? [
-      'node_modules/@rugo-vn/driver/src/mem/index.js',
-      'node_modules/@rugo-vn/driver/src/fs/index.js',
-    ]: []),
-    ...(mongo ? ['node_modules/@rugo-vn/driver/src/mongo/index.js'] : []),
-    'node_modules/@rugo-vn/model/src/index.js',
     'node_modules/@rugo-vn/auth/src/index.js',
-    'node_modules/@rugo-vn/api/src/index.js',
+    'node_modules/@rugo-vn/db/src/index.js',
+    'node_modules/@rugo-vn/storage/src/index.js',
     'node_modules/@rugo-vn/fx/src/index.js',
-    'node_modules/@rugo-vn/view/src/index.js',
     'node_modules/@rugo-vn/server/src/index.js',
+    './src/index.js',
   ],
-  _globals: {
-    ...indexBy(i => `schema.${i._name}`)(schemas),
+  auth: {
+    secret,
+    spaceId: SPACE_ID,
+    tableName: 'users',
   },
-  schemas,
-  driver: {
-    ...(storage ? {
-      mem: resolve(storage),
-      fs: resolve(storage),
-    } : {}),
-    ...(mongo ? { mongo } : {}),
+  db: mongo,
+  storage,
+  open: {
+    admin,
   },
   server: {
     port,
+    space: 'open.get',
     routes: [
-      ...(isDev ? [
-        { method: 'get', path: '/live.js', action: 'open.live' },
-      ] : []),
+      /* all spaces */
+      { method: 'post', path: '/api/register', handler: 'auth.register', input: { data: '_.form' }, output: { body: '_' } },
+      { method: 'post', path: '/api/login', handler: 'auth.login', input: { data: '_.form' }, output: { 'body.token': '_' } },
 
-      { method: 'get', path: '/api/info', action: 'open.info' },
+      /* specific space */
+      {
+        method: 'get',
+        path: '/api/info',
+        handlers: [
+          createGateHandler(),
+          { name: 'pro.info', input: { user: '_.user', space: '_.space', token: '_.headers.authorization' }, output: { body: '_' } },
+        ],
+      },
 
-      { method: 'post', path: '/api/register', action: 'api.register' },
-      { method: 'post', path: '/api/login', action: 'api.login' },
+      /* db handlers */
+      {
+        method: 'post',
+        path: '/api/tables/:tableName',
+        handlers: [
+          createGateHandler('create'),
+          { name: 'db.create', input: { spaceId: '_.space.id', tableName: '_.params.tableName', data: '_.form' }, output: { body: '_' } },
+        ],
+      },
 
-      { method: 'post', path: '/api/:model', action: 'api.create' },
-      { method: 'get', path: '/api/:model', action: 'api.find' },
-      { method: 'get', path: '/api/:model/:id', action: 'api.get' },
-      { method: 'patch', path: '/api/:model/:id', action: 'api.update' },
-      { method: 'delete', path: '/api/:model/:id', action: 'api.remove' },
+      {
+        method: 'get',
+        path: '/api/tables/:tableName',
+        handlers: [
+          createGateHandler('find'),
+          {
+            name: 'db.find',
+            input: {
+              spaceId: '_.space.id',
+              tableName: '_.params.tableName',
+              filters: '_.query.filters',
+              limit: '_.query.limit',
+              sort: '_.query.sort',
+              skip: '_.query.skip',
+              page: '_.query.page'
+            },
+            output: { body: '_' }
+          },
+        ],
+      },
 
-      { method: 'all', path: '/apix/:action/:model', action: 'api.x' },
-      { method: 'all', path: '/apix/:action/:model/:id', action: 'api.x' },
-      
-      { method: 'use', path: '/', action: 'view.render' },
+      {
+        method: 'get',
+        path: '/api/tables/:tableName/:rowId',
+        handlers: [
+          createGateHandler('get'),
+          {
+            name: 'db.get',
+            input: {
+              spaceId: '_.space.id',
+              tableName: '_.params.tableName',
+              id: '_.params.rowId',
+            },
+            output: { body: '_' }
+          },
+        ],
+      },
+
+      {
+        method: 'patch',
+        path: '/api/tables/:tableName/:rowId',
+        handlers: [
+          createGateHandler('update'),
+          {
+            name: 'db.update',
+            input: {
+              spaceId: '_.space.id',
+              tableName: '_.params.tableName',
+              id: '_.params.rowId',
+              set: '_.form.set',
+              unset: '_.form.unset',
+              inc: '_.form.inc',
+            },
+            output: { body: '_' }
+          },
+        ],
+      },
+
+      {
+        method: 'delete',
+        path: '/api/tables/:tableName/:rowId',
+        handlers: [
+          createGateHandler('remove'),
+          {
+            name: 'db.remove',
+            input: {
+              spaceId: '_.space.id',
+              tableName: '_.params.tableName',
+              id: '_.params.rowId',
+            },
+            output: { body: '_' }
+          },
+        ],
+      },
+
+      /* drive handlers */
+      {
+        method: 'get',
+        path: '/api/drives/:driveName',
+        handlers: [
+          createGateHandler('list'),
+          {
+            name: 'storage.list',
+            input: {
+              spaceId: '_.space.id',
+              driveName: '_.params.driveName',
+              path: '_.query.path',
+            },
+            output: { body: '_' },
+          },
+        ]
+      },
+
+      {
+        method: 'post',
+        path: '/api/drives/:driveName',
+        handlers: [
+          createGateHandler('create'),
+          {
+            name: 'storage.create',
+            input: {
+              spaceId: '_.space.id',
+              driveName: '_.params.driveName',
+              path: '_.form.path',
+              isDir: '_.form.isDir',
+              data: '_.form.file',
+            },
+            output: { body: '_' },
+          },
+        ],
+      },
     ],
-    args: {
-      views,
-      authModel: app.authModel || 'users',
-      auth: {},
-    },
-    statics,
-    redirects,
   },
-  auth: {
-    secret: secret,
-  },
-  open: {
-    css: app.css,
-  }
-}
+};
