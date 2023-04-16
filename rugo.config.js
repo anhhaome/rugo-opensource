@@ -1,9 +1,5 @@
-import { resolve } from 'path';
-import { SPACE_ID } from './src/constants.js';
-
 const port = process.env.PORT || 3000;
 const mongo = process.env.MONGO || 'mongodb://root:secret@localhost:27017/demo';
-const secret = process.env.SECRET || 'secretstring';
 const admin =
   process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD
     ? { email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD }
@@ -29,11 +25,6 @@ const createGateHandler = (action) => {
 };
 
 export default {
-  auth: {
-    secret,
-    spaceId: SPACE_ID,
-    tableName: 'users',
-  },
   db: {
     uri: mongo,
   },
