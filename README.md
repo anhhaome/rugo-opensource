@@ -2,48 +2,56 @@
 
 An opensource version of Rugo Platform.
 
-## Environment Variables
+## Pre Requisite
 
-- `PORT`
-- `MONGO`
-- `SECRET`
-- `STORAGE`
-- `ADMIN_EMAIL`
-- `ADMIN_PASSWORD`
+- `docker`
 
-## Usage
+## Getting Started
 
-Install packages:
+Rugo Open is working as a external library to run your entire project directory. In your project directory should have structure:
 
-```bash
-npm i
-npm run rugo:test
-npm run rugo:coverage
+```
+$
+|- init
+  |- your.bundle.zip
+|- .gitignore
+|- package.json
 ```
 
-Mount space:
+Create your own `package.json` file in your project directory and add more information:
 
-```bash
-npm run rugo:mount <your_space_bundle_path>
+```json
+{
+  "type": "module",
+  "scripts": {
+    "mongo": "rugo --prepare && cd .rugo && sudo docker compose up",
+    "dev": "rugo",
+    "restore": "rugo --restore"
+  },
+  "devDependencies": {
+    "@rugo-vn/open": "@latest"
+  }
+}
 ```
 
-Run platform:
+Your `.gitignore`:
 
-```bash
-npm run rugo:dev
-npm run rugo:start
+```txt
+.rugo
+node_modules
+init
+package-lock.json
 ```
 
-Test URI
+Open two terminal consoles and run in each terminal:
 
 ```bash
-curl -X POST http://localhost:3000/api/login -H "Content-Type: application/json" -d '{"email":"admin@rugo.vn","password":"password"}'
+npm run mongo
 ```
 
-Generate TailwindCSS
-
 ```bash
-npm run css <watch_dir> <css_output_path>
+npm run restore /path/to/your/bundle.zip
+npm run dev
 ```
 
 ## License

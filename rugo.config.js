@@ -3,54 +3,61 @@ import { SPACE_ID } from './src/constants.js';
 
 const port = process.env.PORT || 3000;
 const mongo = process.env.MONGO || 'mongodb://root:secret@localhost:27017/demo';
-const storage = resolve(process.env.STORAGE || '.storage');
 const secret = process.env.SECRET || 'secretstring';
-const admin = process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD ? 
-  { email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD } : null;
+const admin =
+  process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD
+    ? { email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD }
+    : null;
 
-const createGateHandler = action => {
+const createGateHandler = (action) => {
   return {
     name: 'auth.gate',
     input: {
       token: '_.headers.authorization',
       perms: '_.space.perms',
-      ...(action ? {
-        'auth.tableName': '_.params.tableName',
-        'auth.driveName': '_.params.driveName',
-        'auth.action': action,
-        'auth.id': '_.params.id'
-      } : {}),
+      ...(action
+        ? {
+            'auth.tableName': '_.params.tableName',
+            'auth.driveName': '_.params.driveName',
+            'auth.action': action,
+            'auth.id': '_.params.id',
+          }
+        : {}),
     },
-    output: { user: '_' }
-  }
-}
+    output: { user: '_' },
+  };
+};
 
 export default {
-  _services: [
-    'node_modules/@rugo-vn/auth/src/index.js',
-    'node_modules/@rugo-vn/db/src/index.js',
-    'node_modules/@rugo-vn/storage/src/index.js',
-    'node_modules/@rugo-vn/fx/src/index.js',
-    'node_modules/@rugo-vn/server/src/index.js',
-    './src/index.js',
-  ],
   auth: {
     secret,
     spaceId: SPACE_ID,
     tableName: 'users',
   },
-  db: mongo,
-  storage,
+  db: {
+    uri: mongo,
+  },
   open: {
     admin,
   },
   server: {
     port,
-    space: 'open.get',
     routes: [
       /* all spaces */
-      { method: 'post', path: '/api/register', handler: 'auth.register', input: { data: '_.form' }, output: { body: '_' } },
-      { method: 'post', path: '/api/login', handler: 'auth.login', input: { data: '_.form' }, output: { 'body.token': '_' } },
+      {
+        method: 'post',
+        path: '/api/register',
+        handler: 'auth.register',
+        input: { data: '_.form' },
+        output: { body: '_' },
+      },
+      {
+        method: 'post',
+        path: '/api/login',
+        handler: 'auth.login',
+        input: { data: '_.form' },
+        output: { 'body.token': '_' },
+      },
 
       /* specific space */
       {
@@ -58,7 +65,15 @@ export default {
         path: '/api/info',
         handlers: [
           createGateHandler(),
-          { name: 'pro.info', input: { user: '_.user', space: '_.space', token: '_.headers.authorization' }, output: { body: '_' } },
+          {
+            name: 'pro.info',
+            input: {
+              user: '_.user',
+              space: '_.space',
+              token: '_.headers.authorization',
+            },
+            output: { body: '_' },
+          },
         ],
       },
 
@@ -68,7 +83,15 @@ export default {
         path: '/api/tables/:tableName',
         handlers: [
           createGateHandler('create'),
-          { name: 'db.create', input: { spaceId: '_.space.id', tableName: '_.params.tableName', data: '_.form' }, output: { body: '_' } },
+          {
+            name: 'db.create',
+            input: {
+              spaceId: '_.space.id',
+              tableName: '_.params.tableName',
+              data: '_.form',
+            },
+            output: { body: '_' },
+          },
         ],
       },
 
@@ -86,9 +109,9 @@ export default {
               limit: '_.query.limit',
               sort: '_.query.sort',
               skip: '_.query.skip',
-              page: '_.query.page'
+              page: '_.query.page',
             },
-            output: { body: '_' }
+            output: { body: '_' },
           },
         ],
       },
@@ -105,7 +128,7 @@ export default {
               tableName: '_.params.tableName',
               id: '_.params.rowId',
             },
-            output: { body: '_' }
+            output: { body: '_' },
           },
         ],
       },
@@ -125,7 +148,7 @@ export default {
               unset: '_.form.unset',
               inc: '_.form.inc',
             },
-            output: { body: '_' }
+            output: { body: '_' },
           },
         ],
       },
@@ -142,7 +165,7 @@ export default {
               tableName: '_.params.tableName',
               id: '_.params.rowId',
             },
-            output: { body: '_' }
+            output: { body: '_' },
           },
         ],
       },
@@ -162,7 +185,7 @@ export default {
             },
             output: { body: '_' },
           },
-        ]
+        ],
       },
 
       {

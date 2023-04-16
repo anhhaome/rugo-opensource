@@ -1,39 +1,105 @@
-import bcrypt from 'bcryptjs';
+#!/usr/bin/env node
+
 import process from 'process';
-import chokidar from 'chokidar';
-import colors from 'colors';
-import WebSocket, { WebSocketServer } from 'ws';
-import { join } from 'path';
-import { path } from "ramda";
-import { PASSWORD_SALT } from '@rugo-vn/auth/src/utils.js';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { createBroker, exec, FileCursor } from '@rugo-vn/service';
+import { existsSync, readFileSync } from 'fs';
+import { mergeDeepLeft } from 'ramda';
 
-export const name = 'open';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const platformRoot = join(__dirname, '../');
+const isDebugMode = process.env.NODE_ENV === 'debug';
 
-export const actions = {
-  async get() {
-    return this.space;
-  },
-};
+const flag = process.argv[2];
+const args = process.argv.slice(3);
 
-export const started = async function() {
-  const isLive = !!process.env.LIVE;
+async function startAll() {
+  // config
+  const workRoot = process.cwd();
+  const runRoot = join(workRoot, '.rugo');
+  const storageRoot = join(runRoot, 'storage');
+  const spaceConfigFile = join(runRoot, 'space.json');
 
-  const storage = path(['settings', 'storage'], this);
-  const space = (await import(join(storage, 'space.js'))).default;
+  if (!existsSync(runRoot)) {
+    await exec(`cp -r "${join(platformRoot, 'templates')}" "${runRoot}"`);
+  }
 
-  const watches = [
-    storage,
-  ];
+  if (flag === '--prepare') {
+    return shutdown('SIGINT')();
+  }
 
-  this.space = space;
+  // space
+  if (!flag && !existsSync(spaceConfigFile)) {
+    console.log(
+      `[RUGO OPEN] Cannot found your space.json config. Please create your own to run the platform!`
+    );
+    return;
+  }
 
-  // load space
-  for (const tableName in space.schemas || {}) {
-    const schema = space.schemas[tableName];
+  const space = flag ? {} : JSON.parse(readFileSync(spaceConfigFile));
+  for (const route of space.routes || []) {
+    if (route.handlers) {
+      for (const handler of route.handlers) {
+        if (handler.name === 'fx.run') {
+          for (const inputName in handler.input)
+            if (handler.input[inputName].trim().toLowerCase() === '_.space.id')
+              handler.input[inputName] = 'storage';
+        }
+      }
+    }
 
-    await this.call('db.setSchema', {
-      spaceId: space.id,
-      tableName,
+    if (route.handler === 'fx.run') {
+      for (const inputName in route.input)
+        if (route.input[inputName].trim().toLowerCase() === '_.space.id')
+          route.input[inputName] = 'storage';
+    }
+  }
+
+  for (const driveName in space.drives || {}) {
+    const driveConfig = space.drives[driveName];
+    if (!driveConfig.mount) continue;
+
+    space.routes.push({
+      path: `${driveConfig.mount}(.*)?`,
+      handlers: [
+        {
+          name: 'serve',
+          input: { from: join(storageRoot, driveName), path: '_.params.0' },
+          output: { headers: '_.headers', body: '_.body' },
+        },
+      ],
+    });
+  }
+
+  // platform
+  const serviceRoot = isDebugMode ? platformRoot : workRoot;
+  const settings = mergeDeepLeft(
+    {
+      _services: [
+        join(serviceRoot, 'node_modules/@rugo-vn/db/src/index.js'),
+        join(serviceRoot, 'node_modules/@rugo-vn/storage/src/index.js'),
+        join(serviceRoot, 'node_modules/@rugo-vn/fx/src/index.js'),
+        join(serviceRoot, 'node_modules/@rugo-vn/server/src/index.js'),
+        join(platformRoot, 'src/open.js'),
+      ],
+      storage: runRoot,
+      server: {
+        space,
+      },
+    },
+    (await import(join(platformRoot, 'rugo.config.js'))).default
+  );
+
+  const broker = createBroker(settings);
+
+  await broker.loadServices();
+  await broker.start();
+
+  // load
+  for (const schema of space.schemas || []) {
+    await broker.call('db.setSchema', {
+      spaceId: 'storage',
       schema,
     });
   }
@@ -41,81 +107,35 @@ export const started = async function() {
   for (const driveName in space.drives || {}) {
     const config = space.drives[driveName];
 
-    await this.call('storage.setConfig', {
-      spaceId: space.id,
+    await broker.call('storage.setConfig', {
+      spaceId: 'storage',
       driveName,
       config,
     });
   }
 
-  // create admin user by default
-  const no = await this.call(`db.count`, { ...this.settings.auth });
-  if (!no && this.settings.open.admin) {
-    this.logger.info(`Create an account for admin`);
-    await this.call(`db.create`, { ...this.settings.auth, data: {
-      email: this.settings.open.admin.email,
-      password: bcrypt.hashSync(this.settings.open.admin.password, PASSWORD_SALT),
-      perms: [
-        { tableName: '*', driveName: '*', action: '*', id: '*' }
-      ],
-    }});
-  }
-
-  // mount routes
-  space.routes ||= [];
-
-  for (const [driveName, config] of Object.entries(space.drives || {})) {
-    if (!config.mount)
-      continue;
-
-    space.routes.push({
-      method: 'get',
-      path: join(config.mount, '(.*)?'),
-      handler: 'serve',
-      input: {
-        from: join(storage, space.id, driveName),
-        path: '_.params.0',
-      },
-      output: {
-        headers: '_.headers',
-        body: '_.body',
-      },
+  // restore
+  if (flag === '--restore') {
+    await broker.call(`open.restore`, {
+      file: FileCursor(join(workRoot, args[0])),
     });
-  }
 
-  // live server
-  if (isLive) {
-    let isChanged = false;
-    let lastChanged = 0;
-
-    const handleChanges = () => {
-      if (!isChanged)
-        return;
-
-      const current = new Date();
-      if (current - lastChanged < 500)
-        return;
-
-      this.logger.info(colors.yellow.bold(`Reload clients`));
-      isChanged = false;
-      wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send('changed');
-        }
-      });
-    }
-    
-    const wss = new WebSocketServer({ port: 8081 });
-
-    for (let p of watches) {
-      let watcher = chokidar.watch(p);
-
-      watcher.on('change', async (e) => {
-        this.logger.info(`On change: ` + colors.white(e));
-        isChanged = true;
-        lastChanged = new Date();
-        setTimeout(handleChanges, 1000);
-      });
-    }
+    return shutdown('SIGINT')();
   }
 }
+
+function shutdown(signal) {
+  return (err) => {
+    console.log(`\n[RUGO OPEN] You are sending ${signal} signal...`);
+    if (err) console.error(err.stack || err);
+    console.log(`[RUGO OPEN] Exiting.`);
+    process.exit(err ? 1 : 0);
+  };
+}
+
+process
+  .on('SIGTERM', shutdown('SIGTERM'))
+  .on('SIGINT', shutdown('SIGINT'))
+  .on('uncaughtException', shutdown('uncaughtException'));
+
+startAll();
