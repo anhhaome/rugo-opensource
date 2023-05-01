@@ -2,6 +2,25 @@
 
 An opensource version of Rugo Platform.
 
+## Usage
+
+Start from bash:
+
+```bash
+rugo /your/project/path
+```
+
+Start from code:
+
+```js
+import { start, stop } from '@rugo-vn/open';
+
+await start('/your/project/path');
+await stop();
+```
+
+If you not provide `/your/project/path`, it will use current directory (`cwd`).
+
 ## Pre Requisite
 
 - `docker`

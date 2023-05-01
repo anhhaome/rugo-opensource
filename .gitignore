@@ -8,3 +8,11 @@ package-lock.json
 coverage
 cypress/videos
 cypress/screenshots
+
+# data ignore
+data
+
+# fixture include
+!test/fixtures/data/
+test/fixtures/data/*
+!test/fixtures/data/space.json

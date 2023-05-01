@@ -38,7 +38,7 @@ export const actions = {
     }
 
     writeFileSync(
-      join(this.settings.storage, '../space.json'),
+      join(this.settings.storage, 'space.json'),
       JSON.stringify(nextSpace, 0, 2)
     );
 
