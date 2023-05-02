@@ -1,8 +1,8 @@
 {
   "name": "@rugo-vn/open",
-  "version": "1.0.0-beta.2",
+  "version": "1.1.0-beta.0",
   "bin": {
-    "rugo": "src/index.js"
+    "rugo": "src/rugo.js"
   },
   "main": "src/index.js",
   "module": "src/index.js",
@@ -29,14 +29,10 @@
     "publish:release": "npm publish --access public"
   },
   "dependencies": {
-    "@rugo-vn/auth": "^2.0.7",
-    "@rugo-vn/db": "^1.0.1",
-    "@rugo-vn/fx": "^1.0.3",
-    "@rugo-vn/live": "1.0.0-beta.0",
-    "@rugo-vn/server": "2.1.0-beta.0",
+    "@rugo-vn/fx": "1.1.0-beta.0",
+    "@rugo-vn/live": "1.0.0-beta.1",
+    "@rugo-vn/server": "2.1.0-beta.2",
     "@rugo-vn/service": "2.1.0-beta.3",
-    "@rugo-vn/shared": "^1.0.0",
-    "@rugo-vn/storage": "^1.0.2",
     "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
     "ramda": "^0.28.0",

@@ -11,6 +11,7 @@ cypress/screenshots
 
 # data ignore
 data
+.socket
 
 # fixture include
 !test/fixtures/data/

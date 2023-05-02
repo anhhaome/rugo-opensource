@@ -1,3 +1,6 @@
 {
-  "assets": [{ "name": "statics", "type": "static", "mount": "/" }]
+  "assets": [
+    { "name": "statics", "type": "static", "mount": "/" },
+    { "name": "views", "type": "view", "mount": "/" }
+  ]
 }

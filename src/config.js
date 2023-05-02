@@ -8,9 +8,12 @@ import {
   SPACE_FILE_NAME,
   SERVER_SERVICE,
   DATA_PATH,
+  VIEW_ENGINE,
+  FX_SERVICE,
+  WATCHER_PORT,
 } from './constants.js';
 
-export async function loadConfig(root) {
+export async function loadConfig(isDev, root) {
   const { CONFIG_PORT: ENV_CONFIG_PORT, PORT: ENV_SERVER_PORT } = process.env;
 
   const spacePath = resolve(root, SPACE_FILE_NAME);
@@ -27,11 +30,14 @@ export async function loadConfig(root) {
         {
           settings: {
             port: ENV_SERVER_PORT || SERVER_PORT,
+            engine: VIEW_ENGINE,
+            inject: isDev ? WATCHER_PORT : false,
             space,
           },
         },
         SERVER_SERVICE
       ),
+      FX_SERVICE,
     ],
   };
 }

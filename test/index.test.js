@@ -15,9 +15,19 @@ describe('Open test', function () {
     await start('./test/fixtures');
   });
 
-  it('should requets', async () => {
+  it('should request static', async () => {
     const res = await chai.request(address).get(`/robots.txt`);
     expect(res.text.split('\n')[0]).to.be.eq('User-agent: Googlebot');
+  });
+
+  it('should request view', async () => {
+    const res = await chai.request(address).get(`/blog.html`);
+    expect(res.text.split('\n')[0]).to.be.eq('Hello template.');
+  });
+
+  it('should request param view', async () => {
+    const res = await chai.request(address).get(`/posts/demo.html`);
+    expect(res.text.split('\n')[0]).to.be.eq('demo');
   });
 
   it('should stop', async () => {

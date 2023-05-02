@@ -1,0 +1,16 @@
+{
+  "name": "fixtures",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_ENV=development rugo"
+  },
+  "dependencies": {
+    "@rugo-vn/open": "../../"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
