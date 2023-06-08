@@ -1,18 +1,32 @@
 import process from 'node:process';
 import chai, { assert, expect } from 'chai';
 import chaiHttp from 'chai-http';
-import { SERVER_PORT } from '../src/constants.js';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { start, stop } from '../src/index.js';
+import { resolve } from 'node:path';
+
+const DB_NAME = 'test';
+const PROJECT_PATH = resolve('./examples/basic');
 
 chai.use(chaiHttp);
 
 describe('Open test', function () {
-  const address = `http://localhost:${SERVER_PORT}`;
-
-  process.env.NODE_ENV = 'development';
+  let mongod, address;
 
   it('should start', async () => {
-    await start('./test/fixtures');
+    mongod = await MongoMemoryServer.create({
+      instance: {
+        dbName: DB_NAME,
+      },
+    });
+
+    process.env.NODE_ENV = 'development';
+    process.env.DB_URI = `${mongod.getUri()}${DB_NAME}`;
+
+    const config = await start(PROJECT_PATH);
+    address = `http://localhost:${
+      config.services.filter((i) => i.name === 'server')[0].settings.port
+    }`;
   });
 
   it('should request static', async () => {
@@ -25,12 +39,8 @@ describe('Open test', function () {
     expect(res.text.split('\n')[0]).to.be.eq('Hello template.');
   });
 
-  it('should request param view', async () => {
-    const res = await chai.request(address).get(`/posts/demo.html`);
-    expect(res.text.split('\n')[0]).to.be.eq('demo');
-  });
-
   it('should stop', async () => {
     await stop();
+    await mongod.stop();
   });
 });

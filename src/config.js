@@ -1,35 +1,54 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
 import process from 'node:process';
+import * as dotenv from 'dotenv';
+import { join, resolve } from 'node:path';
 import { mergeDeepLeft } from 'ramda';
 import {
-  SERVER_PORT,
+  APP_CONFIG_FILE,
   CONFIG_PORT,
-  SPACE_FILE_NAME,
-  SERVER_SERVICE,
-  DATA_PATH,
-  VIEW_ENGINE,
+  DB_SERVICE,
+  DEFAULT_BUILD,
+  DEFAULT_SERVER_PORT,
   FX_SERVICE,
+  SERVER_SERVICE,
+  VIEW_ENGINE,
   WATCHER_PORT,
 } from './constants.js';
 
-export async function loadConfig(isDev, root) {
-  const { CONFIG_PORT: ENV_CONFIG_PORT, PORT: ENV_SERVER_PORT } = process.env;
+export async function loadConfig(appRoot) {
+  // platform config - env
+  dotenv.config();
 
-  const spacePath = resolve(root, SPACE_FILE_NAME);
-  const space = JSON.parse(
-    existsSync(spacePath) ? readFileSync(spacePath) : '{}'
-  );
+  const { SERVER_PORT: envServerPort, DB_URI: envDbUri } = process.env;
+  const isDev = process.env.NODE_ENV === 'development';
 
-  space.storage = join(resolve(root), DATA_PATH);
+  // application config - rugo.config.js
+  const appConfigPath = resolve(appRoot, APP_CONFIG_FILE);
+  let appConfig = {};
+
+  try {
+    appConfig = (await import(appConfigPath)).default;
+  } catch (err) {
+    throw new Error(`Invalid config file ${appConfigPath}`);
+  }
+
+  const build = mergeDeepLeft(appConfig.build || {}, DEFAULT_BUILD);
+  build.root = appRoot;
+
+  // space
+  const { space } = appConfig;
+  if (!space) throw new Error(`Space config is required at ${appConfigPath}`);
+  space.storage = join(appRoot, build.dst);
 
   return {
-    port: ENV_CONFIG_PORT || CONFIG_PORT,
+    isDev,
+    build,
+    port: CONFIG_PORT,
     services: [
+      /* server definition */
       mergeDeepLeft(
         {
           settings: {
-            port: ENV_SERVER_PORT || SERVER_PORT,
+            port: envServerPort || DEFAULT_SERVER_PORT,
             engine: VIEW_ENGINE,
             inject: isDev ? WATCHER_PORT : false,
             space,
@@ -37,6 +56,18 @@ export async function loadConfig(isDev, root) {
         },
         SERVER_SERVICE
       ),
+
+      /* db definition */
+      mergeDeepLeft(
+        {
+          settings: {
+            uri: envDbUri,
+          },
+        },
+        DB_SERVICE
+      ),
+
+      /* fx definition */
       FX_SERVICE,
     ],
   };

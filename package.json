@@ -1,6 +1,6 @@
 {
   "name": "@rugo-vn/open",
-  "version": "1.1.0-beta.2",
+  "version": "1.1.0-beta.3",
   "bin": {
     "rugo": "src/rugo.js"
   },
@@ -26,12 +26,14 @@
     "cypress:open": "cypress open",
     "css": "node ./scripts/css.js",
     "publish:beta": "npm publish --access public --tag beta",
-    "publish:release": "npm publish --access public"
+    "publish:release": "npm publish --access public",
+    "util:generateId": "node scripts/generate-id.js"
   },
   "dependencies": {
-    "@rugo-vn/fx": "1.1.0-beta.0",
+    "@rugo-vn/db": "1.1.0-beta.0",
+    "@rugo-vn/fx": "1.1.0-beta.2",
     "@rugo-vn/live": "1.0.0-beta.1",
-    "@rugo-vn/server": "2.1.0-beta.2",
+    "@rugo-vn/server": "2.1.0-beta.3",
     "@rugo-vn/service": "2.1.0-beta.3",
     "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
@@ -49,6 +51,8 @@
     "cssnano": "^5.1.14",
     "dotenv": "^16.0.3",
     "mocha": "^10.0.0",
+    "mongodb": "^5.6.0",
+    "mongodb-memory-server": "^8.12.2",
     "nodemon": "^2.0.19",
     "postcss": "^8.4.18",
     "postcss-nested": "^6.0.0",

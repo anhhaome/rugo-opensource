@@ -3,6 +3,7 @@ version: '3.8'
 services:
   database:
     image: 'mongo'
+    container_name: rugo-db
     environment:
       - MONGO_INITDB_DATABASE=demo # database name you want to make
       - MONGO_INITDB_ROOT_USERNAME=root # set your container root username

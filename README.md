@@ -19,60 +19,39 @@ await start('/your/project/path');
 await stop();
 ```
 
-If you not provide `/your/project/path`, it will use current directory (`cwd`).
+## Configuration
 
-## Pre Requisite
+For **platform level** `.env`.
 
-- `docker`
+| Name        | Description               | Example                       |
+| ----------- | ------------------------- | ----------------------------- |
+| NODE_ENV    | Runtime enviroment        | "development"<br>"production" |
+| SERVER_PORT | Server's port when listen | 8080                          |
 
-## Getting Started
+For **application level** `rugo.config.js`. In this file, you can use `import.meta.env`.
 
-Rugo Open is working as a external library to run your entire project directory. In your project directory should have structure:
+| Name         | Description                   | Example                    |
+| ------------ | ----------------------------- | -------------------------- |
+| build        | Build information for live    | {}                         |
+| build.src    | Source directory              | "src"                      |
+| build.dst    | Destination (build) directory | "dist"                     |
+| build.public | Place to serve public assets  | "public"                   |
+| build.static | Static directory to build     | "statics"                  |
+| build.view   | View directory to build       | "views"                    |
+| space        | Space information             | {}                         |
+| space.id     | Space's id                    | "648164f1f4c615b0586b2dc4" |
+| space.assets | Space's assets                | []                         |
 
-```
-$
-|- init
-  |- your.bundle.zip
-|- .gitignore
-|- package.json
-```
+## Docker
 
-Create your own `package.json` file in your project directory and add more information:
-
-```json
-{
-  "type": "module",
-  "scripts": {
-    "mongo": "rugo --prepare && cd .rugo && sudo docker compose up",
-    "dev": "rugo",
-    "restore": "rugo --restore"
-  },
-  "devDependencies": {
-    "@rugo-vn/open": "@latest"
-  }
-}
-```
-
-Your `.gitignore`:
-
-```txt
-.rugo
-node_modules
-init
-package-lock.json
-```
-
-Open two terminal consoles and run in each terminal:
+If you want a db to test, run:
 
 ```bash
-npm run mongo
+docker compose up
 ```
 
-```bash
-npm run restore /path/to/your/bundle.zip
-npm run dev
-```
+Now, you can access db with: `mongodb://root:secret@database:27017/demo`
 
 ## License
 
-MIT.
+MIT

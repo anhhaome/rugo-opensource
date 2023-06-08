@@ -1,24 +1,16 @@
-import { goLive } from '@rugo-vn/live';
 import process from 'node:process';
-import * as dotenv from 'dotenv';
+import { goLive } from '@rugo-vn/live';
 import { createBroker } from '@rugo-vn/service';
 import { loadConfig } from './config.js';
 
-let isDev, live, broker;
+let live, broker;
 
-export async function start(root) {
-  dotenv.config();
-  isDev = process.env.NODE_ENV === 'development';
-  root = root || process.cwd();
-
-  const config = await loadConfig(isDev, root);
+export async function start(appRoot = process.cwd()) {
+  const config = await loadConfig(appRoot);
 
   // start live
-  if (isDev) {
-    live = await goLive({
-      root,
-      dst: 'data',
-    });
+  if (config.isDev) {
+    live = await goLive(config.build);
 
     await live.watch(() => {
       console.log('Something changes, re-build source code.');
@@ -27,10 +19,11 @@ export async function start(root) {
 
   // create broker
   broker = await createBroker(config);
+
+  return config;
 }
 
 export async function stop() {
   if (live) await live.close();
-
-  await broker.close();
+  if (broker) await broker.close();
 }
