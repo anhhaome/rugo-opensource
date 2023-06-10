@@ -1,6 +1,6 @@
 {
   "name": "@rugo-vn/open",
-  "version": "1.1.0-beta.3",
+  "version": "1.1.0-beta.4",
   "bin": {
     "rugo": "src/rugo.js"
   },
@@ -30,10 +30,11 @@
     "util:generateId": "node scripts/generate-id.js"
   },
   "dependencies": {
-    "@rugo-vn/db": "1.1.0-beta.0",
+    "@rugo-vn/auth": "2.1.0-beta.1",
+    "@rugo-vn/db": "1.1.0-beta.1",
     "@rugo-vn/fx": "1.1.0-beta.2",
-    "@rugo-vn/live": "1.0.0-beta.1",
-    "@rugo-vn/server": "2.1.0-beta.3",
+    "@rugo-vn/live": "1.0.0-beta.2",
+    "@rugo-vn/server": "2.1.0-beta.8",
     "@rugo-vn/service": "2.1.0-beta.3",
     "bcryptjs": "^2.4.3",
     "colors": "^1.4.0",
@@ -58,6 +59,7 @@
     "postcss-nested": "^6.0.0",
     "rimraf": "^3.0.2",
     "tailwindcss": "^3.2.3",
+    "vite": "^4.3.9",
     "ws": "^8.11.0"
   },
   "nodemonConfig": {

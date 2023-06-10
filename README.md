@@ -23,10 +23,14 @@ await stop();
 
 For **platform level** `.env`.
 
-| Name        | Description               | Example                       |
-| ----------- | ------------------------- | ----------------------------- |
-| NODE_ENV    | Runtime enviroment        | "development"<br>"production" |
-| SERVER_PORT | Server's port when listen | 8080                          |
+| Name           | Description               | Example                                      |
+| -------------- | ------------------------- | -------------------------------------------- |
+| NODE_ENV       | Runtime enviroment        | "development"<br>"production"                |
+| SERVER_PORT    | Server's port when listen | 8080                                         |
+| AUTH_SECRET    | A secret string for jwt   | "thisisasecret"                              |
+| DB_URI         | A mongodb connection uri  | "mongodb://root:secret@localhost:27017/demo" |
+| ADMIN_EMAIL    | Admin email               | "admin@rugo.vn"                              |
+| ADMIN_PASSWORD | Admin password            | "password"                                   |
 
 For **application level** `rugo.config.js`. In this file, you can use `import.meta.env`.
 
@@ -51,6 +55,8 @@ docker compose up
 ```
 
 Now, you can access db with: `mongodb://root:secret@database:27017/demo`
+
+## Default schema
 
 ## License
 

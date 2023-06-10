@@ -1,0 +1,7 @@
+[
+  {
+    "_id": "648443ae0b03d55597b8618b",
+    "name": "admin",
+    "perms": [{ "space": "*", "agent": "*", "asset": "*", "id": "*" }]
+  }
+]

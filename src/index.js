@@ -2,6 +2,8 @@ import process from 'node:process';
 import { goLive } from '@rugo-vn/live';
 import { createBroker } from '@rugo-vn/service';
 import { loadConfig } from './config.js';
+import { join, resolve } from 'node:path';
+import { loadData } from './data.js';
 
 let live, broker;
 
@@ -19,6 +21,9 @@ export async function start(appRoot = process.cwd()) {
 
   // create broker
   broker = await createBroker(config);
+
+  // load data
+  await loadData(broker, config);
 
   return config;
 }

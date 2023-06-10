@@ -12,6 +12,13 @@ export const CONFIG_PORT = 2023; // for broker
 export const WATCHER_PORT = 8081;
 export const VIEW_ENGINE = 'fx.run';
 export const APP_CONFIG_FILE = 'rugo.config.js';
+export const API_PREFIX = '/api/v1';
+
+// naming
+export const USER_ASSET_NAME = 'users';
+export const KEY_ASSET_NAME = 'keys';
+export const ROLE_ASSET_NAME = 'roles';
+export const ADMIN_ROLE_NAME = 'admin';
 
 // default
 export const DEFAULT_SERVER_PORT = 8080;
@@ -19,18 +26,37 @@ export const DEFAULT_BUILD = {
   src: 'src',
   dst: 'dist',
   public: 'public',
+  data: 'data',
   static: 'statics',
   view: 'views',
 };
+export const DEFAULT_ASSETS = [
+  {
+    name: 'keys',
+    type: 'db',
+    properties: {
+      hash: { type: 'String' },
+    },
+  },
+  {
+    name: 'users',
+    type: 'db',
+    properties: {
+      email: { type: 'String' },
+      creds: { type: 'Array' },
+    },
+  },
+  {
+    name: 'roles',
+    type: 'db',
+    properties: {
+      name: { type: 'String' },
+      perms: { type: 'Array' },
+    },
+  },
+];
 
 // service
-export const SERVER_SERVICE = {
-  name: 'server',
-  exec: ['node', './@rugo-vn/server/src/index.js'],
-  cwd,
-  settings: {},
-};
-
 export const DB_SERVICE = {
   name: 'db',
   exec: ['node', './@rugo-vn/db/src/index.js'],
@@ -43,4 +69,30 @@ export const FX_SERVICE = {
   exec: ['node', './@rugo-vn/fx/src/index.js'],
   cwd,
   settings: {},
+};
+
+export const AUTH_SERVICE = {
+  name: 'auth',
+  exec: ['node', './@rugo-vn/auth/src/index.js'],
+  cwd,
+  settings: {
+    db: DB_SERVICE.name,
+  },
+};
+
+export const SERVER_SERVICE = {
+  name: 'server',
+  exec: ['node', './@rugo-vn/server/src/index.js'],
+  cwd,
+  settings: {
+    engine: VIEW_ENGINE,
+    api: {
+      base: API_PREFIX,
+      mappings: {
+        'login.post': 'auth.login',
+        '.get': 'db.find',
+      },
+      auth: AUTH_SERVICE.name,
+    },
+  },
 };
