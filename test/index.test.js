@@ -1,7 +1,6 @@
 import process from 'node:process';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import { start, stop } from '../src/index.js';
 import { resolve } from 'node:path';
 
@@ -16,18 +15,11 @@ chai.use(chaiHttp);
 
 describe('Open test', function () {
   this.timeout(10000);
-  let mongod, address;
+  let address;
   let superToken;
 
   it('should start', async () => {
-    mongod = await MongoMemoryServer.create({
-      instance: {
-        dbName: DB_NAME,
-      },
-    });
-
     process.env.NODE_ENV = 'development';
-    process.env.DB_URI = `${mongod.getUri()}${DB_NAME}`;
     process.env.AUTH_SECRET = 'thisisasecret';
     process.env.ADMIN_EMAIL = ADMIN.email;
     process.env.ADMIN_PASSWORD = ADMIN.password;
@@ -66,6 +58,5 @@ describe('Open test', function () {
 
   it('should stop', async () => {
     await stop();
-    await mongod.stop();
   });
 });

@@ -3,25 +3,28 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // cwd
-const __dirname = dirname(fileURLToPath(import.meta.url));
+export const __dirname = dirname(fileURLToPath(import.meta.url));
 let cwd = resolve(__dirname, '../node_modules');
 if (!existsSync(cwd)) cwd = resolve('./node_modules');
 
 // common
 export const CONFIG_PORT = 2023; // for broker
-export const WATCHER_PORT = 8081;
+export const WATCHER_PORT = 8001;
 export const VIEW_ENGINE = 'fx.run';
 export const APP_CONFIG_FILE = 'rugo.config.js';
 export const API_PREFIX = '/api/v1';
+export const DELAY = 1000;
 
 // naming
 export const USER_ASSET_NAME = 'users';
 export const KEY_ASSET_NAME = 'keys';
 export const ROLE_ASSET_NAME = 'roles';
 export const ADMIN_ROLE_NAME = 'admin';
+export const TEST_DB_NAME = 'test';
 
 // default
 export const DEFAULT_SERVER_PORT = 8080;
+export const DEFAULT_AUTH_SECRET = 'thisisasecret';
 export const DEFAULT_BUILD = {
   src: 'src',
   dst: 'dist',

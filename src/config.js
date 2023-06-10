@@ -8,6 +8,7 @@ import {
   CONFIG_PORT,
   DB_SERVICE,
   DEFAULT_ASSETS,
+  DEFAULT_AUTH_SECRET,
   DEFAULT_BUILD,
   DEFAULT_SERVER_PORT,
   FX_SERVICE,
@@ -110,7 +111,7 @@ export async function loadConfig(appRoot) {
       mergeDeepLeft(
         {
           settings: {
-            secret: envAuthSecret,
+            secret: envAuthSecret || DEFAULT_AUTH_SECRET,
           },
         },
         AUTH_SERVICE

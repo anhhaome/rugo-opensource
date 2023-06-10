@@ -1,19 +1,13 @@
 import { readdirSync, readFileSync } from 'node:fs';
-import { join, parse, resolve } from 'node:path';
+import { join, parse } from 'node:path';
 import { stdout } from 'node:process';
 import { clone, find, flatten, propEq } from 'ramda';
-import {
-  ADMIN_ROLE_NAME,
-  KEY_ASSET_NAME,
-  ROLE_ASSET_NAME,
-  SERVER_SERVICE,
-  USER_ASSET_NAME,
-} from './constants.js';
+import { ADMIN_ROLE_NAME, SERVER_SERVICE, __dirname } from './constants.js';
 
 export async function loadData(broker, config) {
   // default data dir
   const dataPathRoots = [
-    resolve('./data'),
+    join(__dirname, '../data'),
     join(config.build.root, config.build.data),
   ];
 
