@@ -16,8 +16,11 @@ export async function test(config) {
       await axios.get(`http://localhost:${serverService.settings.port}`);
       console.log('no');
     } catch (err) {
-      console.log('yes');
-      break;
+      if (err.code === 'ECONNREFUSED') {
+        console.log('yes');
+        break;
+      }
+      console.log('no');
     }
 
     await new Promise((resolve) => setTimeout(resolve, DELAY));

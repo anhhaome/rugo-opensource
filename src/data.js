@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, parse } from 'node:path';
 import { stdout } from 'node:process';
 import { clone, find, flatten, propEq } from 'ramda';
@@ -13,7 +13,9 @@ export async function loadData(broker, config) {
 
   const dataPaths = flatten(
     dataPathRoots.map((dataPath) =>
-      readdirSync(dataPath).map((i) => join(dataPath, i))
+      existsSync(dataPath)
+        ? readdirSync(dataPath).map((i) => join(dataPath, i))
+        : []
     )
   );
 

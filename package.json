@@ -1,6 +1,6 @@
 {
   "name": "@rugo-vn/open",
-  "version": "1.1.0-beta.5",
+  "version": "1.1.0-beta.6",
   "bin": {
     "rugo": "src/rugo.js"
   },
@@ -33,7 +33,7 @@
     "@rugo-vn/auth": "2.1.0-beta.1",
     "@rugo-vn/db": "1.1.0-beta.1",
     "@rugo-vn/fx": "1.1.0-beta.2",
-    "@rugo-vn/live": "1.0.0-beta.2",
+    "@rugo-vn/live": "1.0.0-beta.3",
     "@rugo-vn/server": "2.1.0-beta.8",
     "@rugo-vn/service": "2.1.0-beta.3",
     "axios": "^1.4.0",
