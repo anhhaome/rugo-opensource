@@ -56,6 +56,71 @@ describe('Open test', function () {
     expect(res).to.has.property('status', 200);
   });
 
+  let id;
+  it('should create post', async () => {
+    const res = await chai
+      .request(address)
+      .post(`/api/v1/posts`)
+      .set('Authorization', `Bearer ${superToken}`)
+      .send({
+        name: 'sample',
+      });
+
+    expect(res.body).to.has.property('name', 'sample');
+    expect(res.body).to.has.property('version', 0);
+    expect(res).to.has.property('status', 200);
+
+    id = res.body.id;
+  });
+
+  it('should replace post', async () => {
+    const res = await chai
+      .request(address)
+      .put(`/api/v1/posts/${id}`)
+      .set('Authorization', `Bearer ${superToken}`)
+      .send({
+        name: 'sample 2',
+      });
+
+    expect(res.body).to.has.property('name', 'sample 2');
+    expect(res.body).to.has.property('version', 0);
+    expect(res).to.has.property('status', 200);
+  });
+
+  it('should update post', async () => {
+    const res = await chai
+      .request(address)
+      .patch(`/api/v1/posts/${id}`)
+      .set('Authorization', `Bearer ${superToken}`)
+      .send({
+        set: {
+          name: 'sample 3',
+        },
+      });
+
+    expect(res.body).to.has.property('name', 'sample 3');
+    expect(res.body).to.has.property('version', 1);
+    expect(res).to.has.property('status', 200);
+  });
+
+  it('should delete post', async () => {
+    const res = await chai
+      .request(address)
+      .delete(`/api/v1/posts/${id}`)
+      .set('Authorization', `Bearer ${superToken}`);
+
+    expect(res.body).to.has.property('name', 'sample 3');
+    expect(res.body).to.has.property('version', 1);
+    expect(res).to.has.property('status', 200);
+
+    const res2 = await chai
+      .request(address)
+      .get(`/api/v1/posts/${id}`)
+      .set('Authorization', `Bearer ${superToken}`);
+    expect(res2.body.meta).to.has.property('total', 0);
+    expect(res2).to.has.property('status', 200);
+  });
+
   it('should stop', async () => {
     await stop();
   });

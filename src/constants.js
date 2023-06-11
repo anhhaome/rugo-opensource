@@ -94,6 +94,10 @@ export const SERVER_SERVICE = {
       mappings: {
         'login.post': 'auth.login',
         '.get': 'db.find',
+        '.post': 'db.create',
+        '.patch': 'db.update',
+        '.put': 'db.replace',
+        '.delete': 'db.remove',
       },
       auth: AUTH_SERVICE.name,
     },
