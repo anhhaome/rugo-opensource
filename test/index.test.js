@@ -40,6 +40,15 @@ describe('Open test', function () {
     expect(res.text.split('\n')[0]).to.be.eq('Hello template.');
   });
 
+  it('should not login', async () => {
+    const res = await chai.request(address).post(`/api/v1/login`).send({});
+    expect(res.body).to.has.property(
+      'error',
+      'Your identity or password is wrong.'
+    );
+    expect(res).to.has.property('status', 403);
+  });
+
   it('should login super account', async () => {
     const res = await chai.request(address).post(`/api/v1/login`).send(ADMIN);
     expect(res.body).to.has.property('token');
