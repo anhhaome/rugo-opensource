@@ -2,11 +2,11 @@ export default {
   space: {
     id: '64815ad1322f0e938395219e',
     assets: [
-      { name: 'statics', type: 'static', mount: '/' },
-      { name: 'views', type: 'view', mount: '/' },
+      { name: 'statics', kind: 'static', mount: '/' },
+      { name: 'views', kind: 'view', mount: '/' },
       {
         name: 'posts',
-        type: 'db',
+        kind: 'db',
         properties: {
           name: { type: 'String' },
         },

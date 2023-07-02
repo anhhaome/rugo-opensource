@@ -36,14 +36,14 @@ export const DEFAULT_BUILD = {
 export const DEFAULT_ASSETS = [
   {
     name: 'keys',
-    type: 'db',
+    kind: 'db',
     properties: {
       hash: { type: 'String' },
     },
   },
   {
     name: 'users',
-    type: 'db',
+    kind: 'db',
     properties: {
       email: { type: 'String' },
       creds: { type: 'Array' },
@@ -51,7 +51,7 @@ export const DEFAULT_ASSETS = [
   },
   {
     name: 'roles',
-    type: 'db',
+    kind: 'db',
     properties: {
       name: { type: 'String' },
       perms: { type: 'Array' },

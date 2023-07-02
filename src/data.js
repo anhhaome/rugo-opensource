@@ -30,7 +30,6 @@ export async function loadData(broker, config) {
 
     stdout.write(`Load data for ${assetName}... `);
     const schema = clone(asset);
-    delete schema.type;
     const res = await broker.call(
       'db.import',
       { data: JSON.parse(readFileSync(dataPath)) },

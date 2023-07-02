@@ -65,10 +65,6 @@ export async function loadConfig(appRoot) {
   const keySchema = clone(find(propEq('name', KEY_ASSET_NAME))(space.assets));
   const roleSchema = clone(find(propEq('name', ROLE_ASSET_NAME))(space.assets));
 
-  delete userSchema.type;
-  delete keySchema.type;
-  delete roleSchema.type;
-
   const opts = {
     userSchema,
     keySchema,
